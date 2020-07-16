@@ -6,7 +6,13 @@ const GameSchema = new mongoose.Schema({
     ref:'users',
     required: true,
   },
+  map:[[
+      {type:Number}
+  ]],
   players:[{
+    arr_id:{
+        type:Number
+    },
     name:{
       type: String,
       required:true,
@@ -25,6 +31,10 @@ const GameSchema = new mongoose.Schema({
     has_mask:{
         type:Boolean,
         default:false
+    },
+    place:{
+        type:Number,
+        default: -1
     }
 
   }],
