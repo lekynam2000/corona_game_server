@@ -3,24 +3,26 @@ const mongoose = require('mongoose');
 const RoomSchema = new mongoose.Schema({
   admin: {
     type: mongoose.Schema.Types.ObjectId,
-    ref:'users',
+    ref: 'users',
     required: true,
   },
-  game:{
+  game: {
     type: mongoose.Schema.Types.ObjectId,
-    ref:'games',
+    ref: 'games',
   },
-  players:[{
-    name:{
-      type: String,
-      required:true,
+  players: [
+    {
+      name: {
+        type: String,
+        required: true,
+      },
+      connected: {
+        type: Boolean,
+      },
+      playing: {
+        type: Boolean,
+      },
     },
-    connected:{
-      type: Boolean
-    },
-    playing:{
-      type: Boolean
-    },
-  }]
+  ],
 });
 module.exports = Room = mongoose.model('rooms', RoomSchema);

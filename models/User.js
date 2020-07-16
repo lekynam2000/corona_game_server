@@ -18,5 +18,11 @@ const UserSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  rooms: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'rooms',
+    },
+  ],
 });
 module.exports = User = mongoose.model('users', UserSchema);
