@@ -1,10 +1,15 @@
 const mongoose = require('mongoose');
+const roles = require('../enum/roles');
 
 const RoomSchema = new mongoose.Schema({
   admin: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'users',
     required: true,
+  },
+  playing: {
+    type: Boolean,
+    default: false,
   },
   game: {
     type: mongoose.Schema.Types.ObjectId,
@@ -21,6 +26,11 @@ const RoomSchema = new mongoose.Schema({
       },
       playing: {
         type: Boolean,
+        default: false,
+      },
+      role: {
+        type: String,
+        enum: Object.values(roles),
       },
     },
   ],

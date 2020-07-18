@@ -7,7 +7,14 @@ const GameSchema = new mongoose.Schema({
     ref: 'users',
     required: true,
   },
-  map: [[{ type: Number }]],
+  map: [[{ type: Boolean }]],
+  pos: [[{ type: Number }]],
+  target_point: {
+    type: Number,
+  },
+  point: {
+    type: Number,
+  },
   players: [
     {
       arr_id: {
@@ -36,6 +43,10 @@ const GameSchema = new mongoose.Schema({
       place: {
         type: Number,
         default: -1,
+      },
+      moved: {
+        type: Boolean,
+        default: false,
       },
     },
   ],
