@@ -11,6 +11,10 @@ const RoomSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  target_point: {
+    type: Number,
+    default: 150,
+  },
   game: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'games',

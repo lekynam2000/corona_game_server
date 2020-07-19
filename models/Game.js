@@ -11,14 +11,21 @@ const GameSchema = new mongoose.Schema({
   pos: [[{ type: Number }]],
   target_point: {
     type: Number,
+    required: true,
   },
   point: {
     type: Number,
+    default: 0,
+  },
+  quara_num: {
+    type: Number,
+    required: true,
   },
   players: [
     {
       arr_id: {
         type: Number,
+        require: true,
       },
       name: {
         type: String,
@@ -27,6 +34,7 @@ const GameSchema = new mongoose.Schema({
       role: {
         type: String,
         enum: Object.values(roles),
+        default: roles.normal,
       },
       infected: {
         type: Boolean,
@@ -48,6 +56,10 @@ const GameSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
       },
+      quarantined: {
+        type: Boolean,
+        defalt: false,
+      },
     },
   ],
   turn: {
@@ -57,6 +69,11 @@ const GameSchema = new mongoose.Schema({
   phase: {
     type: String,
     enum: Object.values(phases),
+    default: phases.start,
+  },
+  moved_num: {
+    type: Number,
+    default: 0,
   },
 });
 module.exports = Game = mongoose.model('games', GameSchema);
