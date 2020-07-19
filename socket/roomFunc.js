@@ -242,7 +242,18 @@ async function doctor_cure(socket, roomId, id, nsp, target_id) {
     handleError(error, socket);
   }
 }
-async function distribute_mask() {}
+async function distribute_mask(socket, roomId, id, nsp, target) {
+  try {
+    const room = await Room.findById(roomId);
+    const game = await Game.findById(room.game);
+    const index = inArray(game.players, id, '_id');
+    if (index < 0 || game.players[index].role != roles.mask_distributor) {
+      return socket.emit('errorGame', { msg: 'Not valid id' });
+    }
+  } catch (error) {
+    handleError(error, socket);
+  }
+}
 async function super_infect() {}
 async function random_infect() {}
 async function endPhase() {}
