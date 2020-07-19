@@ -188,8 +188,8 @@ async function doctor_scan(socket, roomId, id, nsp) {
     const room = await Room.findById(roomId);
     const game = await Game.findById(room.game);
     const index = inArray(game.players, id, '_id');
-    if (index < 0) {
-      return socket.emit('errorGame', { msg: 'Non-doctor cannot scan' });
+    if (index < 0 || game.players[index].role != roles.doctor) {
+      return socket.emit('errorGame', { msg: 'Not valid id' });
     } else {
       let place = game.players[index].place;
       let infect_list = [];
@@ -204,8 +204,39 @@ async function doctor_scan(socket, roomId, id, nsp) {
       }
       if (place == 6) {
         game.phase = phases.doctor_cure;
+      } else {
+        game.phase = phases.distribute_mask;
       }
-      socket.emit();
+      await game.save();
+      socket.emit('scanResult', infect_list);
+      nsp.emit('changePhase', game.phase);
+    }
+  } catch (error) {
+    handleError(error, socket);
+  }
+}
+async function doctor_cure(socket, roomId, id, nsp, target_id) {
+  try {
+    const room = await Room.findById(roomId);
+    const game = await Game.findById(room.game);
+    const index = inArray(game.players, id, '_id');
+    if (index < 0 || game.players[index].role != roles.doctor) {
+      return socket.emit('errorGame', { msg: 'Not valid id' });
+    } else {
+      let target = game.players[target_id];
+      if (target.place == 6 && target.infected) {
+        if (
+          target.role != roles.super_infected &&
+          target.role != roles.super_infected_hidden
+        ) {
+          target.infected = false;
+        }
+        game.phase = phases.distribute_mask;
+        await game.save();
+        nsp.emit('changePhase', game.phase);
+      } else {
+        socket.emit('errorGame', { msg: 'What are you doing doctor?' });
+      }
     }
   } catch (error) {
     handleError(error, socket);
