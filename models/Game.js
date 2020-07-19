@@ -8,7 +8,7 @@ const GameSchema = new mongoose.Schema({
     required: true,
   },
   map: [[{ type: Boolean }]],
-  pos: [[{ type: Number }]],
+  // pos: [[{ type: Number }]],
   target_point: {
     type: Number,
     required: true,
@@ -48,6 +48,10 @@ const GameSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
       },
+      had_infect: {
+        type: Boolean,
+        default: false,
+      },
       place: {
         type: Number,
         default: -1,
@@ -69,7 +73,7 @@ const GameSchema = new mongoose.Schema({
   phase: {
     type: String,
     enum: Object.values(phases),
-    default: phases.start,
+    default: phases.move,
   },
   moved_num: {
     type: Number,
@@ -77,3 +81,12 @@ const GameSchema = new mongoose.Schema({
   },
 });
 module.exports = Game = mongoose.model('games', GameSchema);
+
+// Map description:
+// 0: Canteen 2
+// 1: The Arc
+// 2: Nanyang Auditorium
+// 3: The Hive
+// 4: Yuunan Garden
+// 5: Hall 6
+// 6: Fullerton
