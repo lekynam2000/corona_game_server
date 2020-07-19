@@ -1,6 +1,8 @@
 const User = require('../models/User');
 const Room = require('../models/Room');
 const Game = require('../models/Game');
+const roles = require('../enum/roles');
+const phases = require('../enum/phases');
 module.exports = async function (socket) {};
 function inArray(array, id, keyCompare = null) {
   let index;
@@ -49,13 +51,58 @@ async function gameStart(socket, roomId, nsp) {
         msg: 'Player is not assigned role or player is not connected',
       });
     }
+    const newGame = {};
+    newGame['players'] = room.players.map((player) => ({
+      name: player.name,
+      role: player.role,
+    }));
+    let quara_num = 0;
+    for (let id in newGame['players']) {
+      player = newGame['players'][id];
+      player.arr_id = id;
+      if (
+        player.role == roles.super_infected ||
+        player.role == roles.super_infected_hidden
+      ) {
+        player['infected'] = true;
+        quara_num++;
+      } else {
+        player['infected'] = false;
+      }
+    }
+    let map = createMap();
+    let pos = [];
+    for (let i = 0; i < map.length; i++) {
+      pos.push([]);
+    }
+    newGame['map'] = map;
+    newGame['pos'] = pos;
+    newGame['admin'] = room.admin;
+    newGame['quara_num'] = quara_num;
+    newGame['target_point'] = room.target_point;
+    const game = new Game(newGame);
+    await game.save();
+    console.log(game);
+    nsp.emit('startGame', { game });
   } catch (error) {
     socket.emit('errorGame', { msg: 'Internal Server Error' });
     console.error(error);
   }
 }
 async function beginPhase() {}
-async function quarantine() {}
+async function quarantine(socket, roomId, nsp, pList) {
+  const room = await Room.findById(roomId);
+  const game = await Game.findById(room.game);
+  if (game.turn > 0 && game.phase == phases.quarantine) {
+    for (let id of pList) {
+      game.players[id].quarantined = true;
+    }
+    game.phase = phases.doctor;
+    await game.save();
+    nsp.emit('quarantined', pList);
+    nsp.emit('changePhase', game.phase);
+  }
+}
 async function doctor() {}
 async function distribute_mask() {}
 async function super_infect() {}
@@ -89,6 +136,7 @@ function createMap(des = [], size = 7) {
   a = des.split(' ');
   for (let x of a) {
     map[x[0]][x[1]] = true;
+    map[x[1]][x[0]] = true;
   }
   return map;
 }
