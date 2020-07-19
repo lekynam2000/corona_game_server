@@ -30,8 +30,7 @@ async function addPlayer(socket, name, roomId, nsp) {
     socket.emit('getId', { id: room.players[-1]._id });
     nsp.emit('updatePlayers', { players: room.players });
   } catch (error) {
-    console.error(error);
-    socket.emit('errorGame', { msg: 'Internal Server Error' });
+    handleError(error, socket);
   }
 }
 async function gameStart(socket, roomId, nsp) {
@@ -71,12 +70,12 @@ async function gameStart(socket, roomId, nsp) {
       }
     }
     let map = createMap();
-    let pos = [];
-    for (let i = 0; i < map.length; i++) {
-      pos.push([]);
-    }
     newGame['map'] = map;
-    newGame['pos'] = pos;
+    // let pos = [];
+    // for (let i = 0; i < map.length; i++) {
+    //   pos.push([]);
+    // }
+    // newGame['pos'] = pos;
     newGame['admin'] = room.admin;
     newGame['quara_num'] = quara_num;
     newGame['target_point'] = room.target_point;
@@ -85,29 +84,138 @@ async function gameStart(socket, roomId, nsp) {
     console.log(game);
     nsp.emit('startGame', { game });
   } catch (error) {
-    socket.emit('errorGame', { msg: 'Internal Server Error' });
-    console.error(error);
+    handleError(error, socket);
   }
 }
 async function beginPhase() {}
 async function quarantine(socket, roomId, nsp, pList) {
-  const room = await Room.findById(roomId);
-  const game = await Game.findById(room.game);
-  if (game.turn > 0 && game.phase == phases.quarantine) {
-    for (let id of pList) {
-      game.players[id].quarantined = true;
+  try {
+    const room = await Room.findById(roomId);
+    const game = await Game.findById(room.game);
+    flag = true;
+    if (game.turn > 0 && game.phase == phases.quarantine) {
+      for (let id of pList) {
+        if (
+          game.players[id].role == role.doctors ||
+          game.players[id].role == roles.mask_distributor ||
+          game.players[id].role == roles.police
+        ) {
+          return socket.emit('errorGame', {
+            msg: 'Special Role cannot be quarantined',
+          });
+        }
+        if (
+          game.players[id].role != roles.super_infected_hidden &&
+          game.players[id].role != roles.super_infected
+        ) {
+          flag = false;
+        }
+        game.players[id].quarantined = true;
+        game.moved_num++;
+      }
+      if (flag) {
+        endGame(socket, roomId, nsp, true);
+        return;
+      }
+      game.phase = phases.doctor;
+      await game.save();
+      nsp.emit('quarantined', pList);
+      nsp.emit('changePhase', game.phase);
     }
-    game.phase = phases.doctor;
-    await game.save();
-    nsp.emit('quarantined', pList);
-    nsp.emit('changePhase', game.phase);
+  } catch (error) {
+    handleError(error, socket);
   }
 }
-async function doctor() {}
+async function move(socket, roomId, nsp, arr_id, target) {
+  try {
+    const room = await Room.findById(roomId);
+    const game = await Game.findById(room.game);
+    // const player = game.players[arr_id];
+    const curr = player.place;
+    if (
+      game.players[arr_id].moved ||
+      game.players[arr_id].role == roles.police
+    ) {
+      return socket.emit('errorGame', {
+        msg: 'Unable to move',
+      });
+    }
+    if (curr != -1 && !game.map[curr][target]) {
+      return socket.emit('errorGame', {
+        msg: 'Cannot move to unconnected place',
+      });
+    }
+    game.players[arr_id].place = target;
+    game.moved_num++;
+    if (game.moved_num == game.players.length - 1) {
+      let doctor = game.players.filter((p) => p.role == roles.doctor)[0];
+      let flag = true;
+      for (let p of game.players) {
+        if (
+          p.roles == roles.super_infected ||
+          p.roles == roles.super_infected_hidden
+        ) {
+          if (p.place != doctor.place) {
+            flag = false;
+          }
+        }
+      }
+      if (flag) {
+        game.phase = phases.distribute_mask;
+      } else {
+        game.phase = phases.doctor_scan;
+      }
+    }
+    await game.save();
+    if (game.moved_num == game.players.length - 1) {
+      nsp.emit('updateMove', {
+        players: game.players.map((p) => ({
+          arr_id: p.arr_id,
+          place: p.place,
+          name: p.name,
+        })),
+      });
+    }
+    if (game.phase != phases.moved) {
+      nsp.emit('changePhase', game.phase);
+    }
+  } catch (error) {
+    handleError(error, socket);
+  }
+}
+async function doctor_scan(socket, roomId, id, nsp) {
+  try {
+    const room = await Room.findById(roomId);
+    const game = await Game.findById(room.game);
+    const index = inArray(game.players, id, '_id');
+    if (index < 0) {
+      return socket.emit('errorGame', { msg: 'Non-doctor cannot scan' });
+    } else {
+      let place = game.players[index].place;
+      let infect_list = [];
+      for (let player of game.players) {
+        if (
+          player.infected &&
+          player.role != roles.super_infected_hidden &&
+          player.place == place
+        ) {
+          infect_list.push(player.arr_id);
+        }
+      }
+      if (place == 6) {
+        game.phase = phases.doctor_cure;
+      }
+      socket.emit();
+    }
+  } catch (error) {
+    handleError(error, socket);
+  }
+}
 async function distribute_mask() {}
 async function super_infect() {}
 async function random_infect() {}
 async function endPhase() {}
+async function endGame() {}
 async function disconnect(socket, id, roomId, nsp) {
   try {
     const room = await Room.findById(roomId);
@@ -121,8 +229,7 @@ async function disconnect(socket, id, roomId, nsp) {
     await room.save();
     nsp.emit('updatePlayers', { players: room.players });
   } catch (error) {
-    socket.emit('errorGame', { msg: 'Internal Server Error' });
-    console.error(error);
+    handleError(error, socket);
   }
 }
 function createMap(des = [], size = 7) {
@@ -146,4 +253,17 @@ function createFalseArr(size) {
     arr.push(false);
   }
   return arr;
+}
+function calcInfection(players) {
+  let infect = 0;
+  for (let player in players) {
+    if (player.infected) {
+      infect++;
+    }
+  }
+  return infect;
+}
+function handleError(error, socket) {
+  socket.emit('errorGame', { msg: 'Internal Server Error' });
+  console.error(error);
 }
