@@ -119,12 +119,19 @@ async function quarantine(socket, roomId, nsp, pList) {
         game.moved_num++;
       }
       if (flag) {
-        endGame(socket, roomId, nsp, true);
+        endGame(roomId, nsp, true);
         return;
       }
       game.phase = phases.move;
       await game.save();
-      nsp.emit('quarantined', pList);
+      nsp.emit('updateMove', {
+        players: game.players.map((p) => ({
+          arr_id: p.arr_id,
+          place: p.place,
+          name: p.name,
+          quarantined: p.quarantine,
+        })),
+      });
       nsp.emit('changePhase', game.phase);
     }
   } catch (error) {
@@ -181,6 +188,7 @@ async function move(socket, roomId, nsp, arr_id, target) {
           arr_id: p.arr_id,
           place: p.place,
           name: p.name,
+          quarantined: p.quarantine,
         })),
       });
     }
@@ -380,8 +388,48 @@ async function random_infect(roomId, nsp) {
     handleError(error, nsp);
   }
 }
-async function endPhase() {}
-async function endGame() {}
+async function endPhase(roomId, nsp) {
+  try {
+    const room = await Room.findById(roomId);
+    const game = await Game.findById(room.game);
+    if (game.phase != phases.endPhase) {
+      return nsp.emit('errorGame', { msg: 'Random infect in wrong phase' });
+    }
+    let infect_num = calcInfection(game.players);
+    game.point += infect_num;
+    game.moved_num = 0;
+    game.turn++;
+    game.phase = phases.quarantine;
+    for (let player of game.players) {
+      player.has_mask = false;
+      player.moved = false;
+      player.had_infect = false;
+      if (player.quarantined) {
+        player.place = 0;
+        player.quarantined = false;
+      }
+    }
+    await game.save();
+    nsp.emit('updateTurn', game.turn);
+    nsp.emit('updateMove', {
+      players: game.players.map((p) => ({
+        arr_id: p.arr_id,
+        place: p.place,
+        name: p.name,
+        quarantined: p.quarantined,
+      })),
+    });
+    nsp.emit('updatePhase', game.phase);
+    nsp.emit('updateInfected', infect_num);
+    nsp.emit('updatePoint', game.point);
+    if (game.point >= game.target_point) {
+      endGame(roomId, nsp, false);
+    }
+  } catch (error) {
+    handleError(error, nsp);
+  }
+}
+async function endGame(roomId, nsp, good_win) {}
 async function disconnect(socket, id, roomId, nsp) {
   try {
     const room = await Room.findById(roomId);
