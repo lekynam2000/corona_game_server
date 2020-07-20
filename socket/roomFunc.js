@@ -93,7 +93,10 @@ async function quarantine(socket, roomId, nsp, pList) {
     const room = await Room.findById(roomId);
     const game = await Game.findById(room.game);
     flag = true;
-    if (game.turn > 0 && game.phase == phases.quarantine) {
+    if (game.phase != phases.quarantine) {
+      return nsp.emit('errorGame', { msg: 'Quarantine in wrong phase' });
+    }
+    if (game.turn > 0) {
       for (let id of pList) {
         if (
           game.players[id].role == role.doctors ||
@@ -109,9 +112,8 @@ async function quarantine(socket, roomId, nsp, pList) {
           game.players[id].role != roles.super_infected
         ) {
           flag = false;
-        }
-        else{
-          game.infected_num ++;
+        } else {
+          game.infected_num++;
         }
         game.players[id].quarantined = true;
         game.moved_num++;
@@ -120,7 +122,7 @@ async function quarantine(socket, roomId, nsp, pList) {
         endGame(socket, roomId, nsp, true);
         return;
       }
-      game.phase = phases.doctor;
+      game.phase = phases.move;
       await game.save();
       nsp.emit('quarantined', pList);
       nsp.emit('changePhase', game.phase);
@@ -133,6 +135,9 @@ async function move(socket, roomId, nsp, arr_id, target) {
   try {
     const room = await Room.findById(roomId);
     const game = await Game.findById(room.game);
+    if (game.phase != phases.move) {
+      return nsp.emit('errorGame', { msg: 'Move in wrong phase' });
+    }
     // const player = game.players[arr_id];
     const curr = player.place;
     if (
@@ -190,6 +195,9 @@ async function doctor_scan(socket, roomId, id, nsp) {
   try {
     const room = await Room.findById(roomId);
     const game = await Game.findById(room.game);
+    if (game.phase != phases.doctor_scan) {
+      return nsp.emit('errorGame', { msg: 'Scan in wrong phase' });
+    }
     const index = inArray(game.players, id, '_id');
     if (index < 0 || game.players[index].role != roles.doctor) {
       return socket.emit('errorGame', { msg: 'Not valid id' });
@@ -222,13 +230,16 @@ async function doctor_cure(socket, roomId, id, nsp, target_id) {
   try {
     const room = await Room.findById(roomId);
     const game = await Game.findById(room.game);
+    if (game.phase != phases.doctor_cure) {
+      return nsp.emit('errorGame', { msg: 'Cure in wrong phase' });
+    }
     const index = inArray(game.players, id, '_id');
     if (index < 0 || game.players[index].role != roles.doctor) {
       return socket.emit('errorGame', { msg: 'Not valid id' });
     } else {
       let target = game.players[target_id];
-      if(!target){
-        return socket.emit('errorGame',{msg:'Not valid target'});
+      if (!target) {
+        return socket.emit('errorGame', { msg: 'Not valid target' });
       }
       if (target.place == 6 && target.infected) {
         if (
@@ -252,99 +263,122 @@ async function distribute_mask(socket, roomId, id, nsp, target_id) {
   try {
     const room = await Room.findById(roomId);
     const game = await Game.findById(room.game);
+    if (game.phase != phases.distribute_mask) {
+      return nsp.emit('errorGame', { msg: 'Distribute mask in wrong phase' });
+    }
     const index = inArray(game.players, id, '_id');
     if (index < 0 || game.players[index].role != roles.mask_distributor) {
       return socket.emit('errorGame', { msg: 'Not valid id' });
-    }
-    else{
-      if(!game.players[target_id] || game.players[target_id].place != game.players[index].place){
-        return socket.emit('errorGame',{msg:'Not valid target'})
+    } else {
+      if (
+        !game.players[target_id] ||
+        game.players[target_id].place != game.players[index].place
+      ) {
+        return socket.emit('errorGame', { msg: 'Not valid target' });
       }
       game.players[target_id].has_mask = true;
       game.phase = phases.super_infect;
       await game.save();
-      nsp.emit('changePhase',game.phase);
+      nsp.emit('changePhase', game.phase);
     }
   } catch (error) {
     handleError(error, socket);
   }
 }
-async function super_infect(socket,roomId,id,nsp,target_id) {
+async function super_infect(socket, roomId, id, nsp, target_id) {
   try {
-    
- 
-  const room = await Room.findById(roomId);
-  const game = await Game.findById(room.game);
-  const index = inArray(game.players, id, '_id');
-  if (index < 0 || (game.players[index].role != roles.super_infected && game.players[index].role != roles.super_infected_hidden)) {
-    return socket.emit('errorGame', { msg: 'Not valid id' });
+    const room = await Room.findById(roomId);
+    const game = await Game.findById(room.game);
+    if (game.phase != phases.super_infect) {
+      return nsp.emit('errorGame', { msg: 'Super infect in wrong phase' });
+    }
+    const index = inArray(game.players, id, '_id');
+    if (
+      index < 0 ||
+      (game.players[index].role != roles.super_infected &&
+        game.players[index].role != roles.super_infected_hidden)
+    ) {
+      return socket.emit('errorGame', { msg: 'Not valid id' });
+    }
+    if (
+      !game.players[target_id] ||
+      game.players[target_id].place != game.players[index].place ||
+      game.players[target_id].role == roles.doctor ||
+      game.players[target_id].role == roles.doctor
+    ) {
+      return socket.emit('errorGame', { msg: 'Not valid target' });
+    }
+    if (game.players[index].had_infect || game.players[index].quarantined) {
+      return socket.emit('errorGame', { msg: 'Cannot infect' });
+    }
+    if (!game.players[index].has_mask && !game.players[target_id].has_mask) {
+      game.players[target_id].infected = true;
+    }
+    game.infected_num++;
+    if (game.infected_num == game.quara_num) {
+      game.phase = phases.random_infect;
+    }
+    await game.save();
+    if (game.phase == phases.random_infect) {
+      nsp.emit('changePhase', game.phase);
+    }
+  } catch (error) {
+    handleError(error, socket);
   }
-  if(!game.players[target_id] || game.players[target_id].place != game.players[index].place|| game.players[target_id].role == roles.doctor || game.players[target_id].role == roles.doctor){
-    return socket.emit('errorGame', { msg: 'Not valid target' });
-  }
-  if(game.players[index].had_infect || game.players[index].quarantined){
-    return socket.emit('errorGame',{msg: 'Cannot infect'})
-  }
-  if(!game.players[index].has_mask && !game.players[target_id].has_mask){
-    game.players[target_id].infected = true;
-  }
-  game.infected_num ++;
-  if(game.infected_num == game.quara_num){
-    game.phase = phases.random_infect
-  }
-  await game.save();
-  if(game.phase == phases.random_infect){
-    nsp.emit('changePhase',game.phase);
-  }
-} catch (error) {
-    handleError(error,socket);
 }
-}
-async function random_infect(roomId,nsp) {
+async function random_infect(roomId, nsp) {
   try {
-  const room = await Room.findById(roomId);
-  const game = await Game.findById(room.game);
-  // each element represent set of players in the place
-  const place = [];
-  // list of person gonna infect
-  const infect_list = [];
-  for(let i =0;i<game.map.length;i++){
-    place.push([])
-  }
-  for(let player of game.players){
-    if(!player.quarantined && player.infected && !player.has_mask && player.role == roles.normal){
-      infect_list.push(player.arr_id);
+    const room = await Room.findById(roomId);
+    const game = await Game.findById(room.game);
+    if (game.phase != phases.random_infect) {
+      return nsp.emit('errorGame', { msg: 'Random infect in wrong phase' });
     }
-    if(!player.quarantined && !player.had_mask){
-      place[player.place].push(player.arr_id);
+    // each element represent set of players in the place
+    const place = [];
+    // list of person gonna infect
+    const infect_list = [];
+    for (let i = 0; i < game.map.length; i++) {
+      place.push([]);
     }
-  }
-  // for each infector, choose random player in the same room to infect
-  for( let infector_id of infect_list){
-    let val = Math.random();
-    let currentPlace = game.players[infector_id].place;
-    if(place[currentPlace].length == 1){
-      continue;
-    }
-    //infect rate
-    let percent = 0.4+0.1*place[currentPlace].length;
-    if(val<percent){
-      // infection happen
-      let infected_id = place[getRandomInt(place[currentPlace].length)]
-      if(infected_id == infector_id){
-        infected_id = place[getRandomInt(place[currentPlace].length)]
+    for (let player of game.players) {
+      if (
+        !player.quarantined &&
+        player.infected &&
+        !player.has_mask &&
+        player.role == roles.normal
+      ) {
+        infect_list.push(player.arr_id);
       }
-      if(game.players[infected_id].role == roles.normal){
-        game.players[infector_id].infected = true;
+      if (!player.quarantined && !player.had_mask) {
+        place[player.place].push(player.arr_id);
       }
     }
+    // for each infector, choose random player in the same room to infect
+    for (let infector_id of infect_list) {
+      let val = Math.random();
+      let currentPlace = game.players[infector_id].place;
+      if (place[currentPlace].length == 1) {
+        continue;
+      }
+      //infect rate
+      let percent = 0.4 + 0.1 * place[currentPlace].length;
+      if (val < percent) {
+        // infection happen
+        let infected_id = place[getRandomInt(place[currentPlace].length)];
+        if (infected_id == infector_id) {
+          infected_id = place[getRandomInt(place[currentPlace].length)];
+        }
+        if (game.players[infected_id].role == roles.normal) {
+          game.players[infector_id].infected = true;
+        }
+      }
+    }
+    game.phase = phases.endPhase;
+    await game.save();
+    nsp.emit('changePhase', game.phase);
+  } catch (error) {
+    handleError(error, nsp);
   }
-  game.phase = phases.endPhase;
-  await game.save();
-  nsp.emit('changePhase',game.phase);
-} catch (error) {
-   handleError(error,nsp); 
-}
 }
 async function endPhase() {}
 async function endGame() {}
