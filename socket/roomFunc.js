@@ -224,6 +224,9 @@ async function doctor_cure(socket, roomId, id, nsp, target_id) {
       return socket.emit('errorGame', { msg: 'Not valid id' });
     } else {
       let target = game.players[target_id];
+      if(!target){
+        return socket.emit('errorGame',{msg:'Not valid target'});
+      }
       if (target.place == 6 && target.infected) {
         if (
           target.role != roles.super_infected &&
@@ -242,13 +245,22 @@ async function doctor_cure(socket, roomId, id, nsp, target_id) {
     handleError(error, socket);
   }
 }
-async function distribute_mask(socket, roomId, id, nsp, target) {
+async function distribute_mask(socket, roomId, id, nsp, target_id) {
   try {
     const room = await Room.findById(roomId);
     const game = await Game.findById(room.game);
     const index = inArray(game.players, id, '_id');
     if (index < 0 || game.players[index].role != roles.mask_distributor) {
       return socket.emit('errorGame', { msg: 'Not valid id' });
+    }
+    else{
+      if(!game.players[target_id] || game.players[target_id].place != game.players[index].place){
+        return socket.emit('errorGame',{msg:'Not valid target'})
+      }
+      game.players[target_id].has_mask = true;
+      game.phase = phases.super_infect;
+      await game.save();
+      nsp.emit('changePhase',game.phase);
     }
   } catch (error) {
     handleError(error, socket);
