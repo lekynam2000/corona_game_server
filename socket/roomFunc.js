@@ -276,7 +276,7 @@ async function super_infect(socket,roomId,id,nsp,target_id) {
     if (index < 0 || (game.players[index].role != roles.super_infected && game.players[index].role != roles.super_infected_hidden)) {
       return socket.emit('errorGame', { msg: 'Not valid id' });
     }
-    if(!game.players[target_id] || game.players[target_id].place != game.players[index].place){
+    if(!game.players[target_id] || game.players[target_id].place != game.players[index].place|| game.players[target_id].role == roles.doctor || game.players[target_id].role == roles.doctor){
       return socket.emit('errorGame', { msg: 'Not valid target' });
     }
     if(game.players[index].had_infect || game.players[index].quarantined){
