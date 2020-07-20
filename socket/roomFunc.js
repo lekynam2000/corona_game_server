@@ -429,7 +429,22 @@ async function endPhase(roomId, nsp) {
     handleError(error, nsp);
   }
 }
-async function endGame(roomId, nsp, good_win) {}
+async function endGame(roomId, nsp, good_win) {
+  const room = await Room.findById(roomId);
+  let msg = '';
+  if (good_win) {
+    msg = 'Every super infected found. Congratulation, you defeated Corona';
+  } else {
+    msg = 'Corona side win. You failed to control the pandemic';
+  }
+  room.game = null;
+  room.playing = false;
+  room.players.forEach((p) => {
+    p.playing = false;
+  });
+  await room.save();
+  nsp.emit('endGame', { msg });
+}
 async function disconnect(socket, id, roomId, nsp) {
   try {
     const room = await Room.findById(roomId);
