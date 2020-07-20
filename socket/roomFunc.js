@@ -270,6 +270,9 @@ async function distribute_mask(socket, roomId, id, nsp, target_id) {
   }
 }
 async function super_infect(socket,roomId,id,nsp,target_id) {
+  try {
+    
+ 
   const room = await Room.findById(roomId);
   const game = await Game.findById(room.game);
   const index = inArray(game.players, id, '_id');
@@ -282,7 +285,9 @@ async function super_infect(socket,roomId,id,nsp,target_id) {
   if(game.players[index].had_infect || game.players[index].quarantined){
     return socket.emit('errorGame',{msg: 'Cannot infect'})
   }
-  game.players[target_id].infected = true;
+  if(!game.players[index].has_mask && !game.players[target_id].has_mask){
+    game.players[target_id].infected = true;
+  }
   game.infected_num ++;
   if(game.infected_num == game.quara_num){
     game.phase = phases.random_infect
@@ -291,10 +296,55 @@ async function super_infect(socket,roomId,id,nsp,target_id) {
   if(game.phase == phases.random_infect){
     nsp.emit('changePhase',game.phase);
   }
+} catch (error) {
+    handleError(error,socket);
+}
 }
 async function random_infect(roomId,nsp) {
+  try {
   const room = await Room.findById(roomId);
   const game = await Game.findById(room.game);
+  // each element represent set of players in the place
+  const place = [];
+  // list of person gonna infect
+  const infect_list = [];
+  for(let i =0;i<game.map.length;i++){
+    place.push([])
+  }
+  for(let player of game.players){
+    if(!player.quarantined && player.infected && !player.has_mask && player.role == roles.normal){
+      infect_list.push(player.arr_id);
+    }
+    if(!player.quarantined && !player.had_mask){
+      place[player.place].push(player.arr_id);
+    }
+  }
+  // for each infector, choose random player in the same room to infect
+  for( let infector_id of infect_list){
+    let val = Math.random();
+    let currentPlace = game.players[infector_id].place;
+    if(place[currentPlace].length == 1){
+      continue;
+    }
+    //infect rate
+    let percent = 0.4+0.1*place[currentPlace].length;
+    if(val<percent){
+      // infection happen
+      let infected_id = place[getRandomInt(place[currentPlace].length)]
+      if(infected_id == infector_id){
+        infected_id = place[getRandomInt(place[currentPlace].length)]
+      }
+      if(game.players[infected_id].role == roles.normal){
+        game.players[infector_id].infected = true;
+      }
+    }
+  }
+  game.phase = phases.endPhase;
+  await game.save();
+  nsp.emit('changePhase',game.phase);
+} catch (error) {
+   handleError(error,nsp); 
+}
 }
 async function endPhase() {}
 async function endGame() {}
@@ -348,4 +398,7 @@ function calcInfection(players) {
 function handleError(error, socket) {
   socket.emit('errorGame', { msg: 'Internal Server Error' });
   console.error(error);
+}
+function getRandomInt(max) {
+  return Math.floor(Math.random() * Math.floor(max));
 }
