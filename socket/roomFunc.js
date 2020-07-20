@@ -271,28 +271,31 @@ async function distribute_mask(socket, roomId, id, nsp, target_id) {
 }
 async function super_infect(socket,roomId,id,nsp,target_id) {
   const room = await Room.findById(roomId);
-    const game = await Game.findById(room.game);
-    const index = inArray(game.players, id, '_id');
-    if (index < 0 || (game.players[index].role != roles.super_infected && game.players[index].role != roles.super_infected_hidden)) {
-      return socket.emit('errorGame', { msg: 'Not valid id' });
-    }
-    if(!game.players[target_id] || game.players[target_id].place != game.players[index].place|| game.players[target_id].role == roles.doctor || game.players[target_id].role == roles.doctor){
-      return socket.emit('errorGame', { msg: 'Not valid target' });
-    }
-    if(game.players[index].had_infect || game.players[index].quarantined){
-      return socket.emit('errorGame',{msg: 'Cannot infect'})
-    }
-    game.players[target_id].infected = true;
-    game.infected_num ++;
-    if(game.infected_num == game.quara_num){
-      game.phase = phases.random_infect
-    }
-    await game.save();
-    if(game.phase == phases.random_infect){
-      nsp.emit('changePhase',game.phase);
-    }
+  const game = await Game.findById(room.game);
+  const index = inArray(game.players, id, '_id');
+  if (index < 0 || (game.players[index].role != roles.super_infected && game.players[index].role != roles.super_infected_hidden)) {
+    return socket.emit('errorGame', { msg: 'Not valid id' });
+  }
+  if(!game.players[target_id] || game.players[target_id].place != game.players[index].place|| game.players[target_id].role == roles.doctor || game.players[target_id].role == roles.doctor){
+    return socket.emit('errorGame', { msg: 'Not valid target' });
+  }
+  if(game.players[index].had_infect || game.players[index].quarantined){
+    return socket.emit('errorGame',{msg: 'Cannot infect'})
+  }
+  game.players[target_id].infected = true;
+  game.infected_num ++;
+  if(game.infected_num == game.quara_num){
+    game.phase = phases.random_infect
+  }
+  await game.save();
+  if(game.phase == phases.random_infect){
+    nsp.emit('changePhase',game.phase);
+  }
 }
-async function random_infect() {}
+async function random_infect(roomId,nsp) {
+  const room = await Room.findById(roomId);
+  const game = await Game.findById(room.game);
+}
 async function endPhase() {}
 async function endGame() {}
 async function disconnect(socket, id, roomId, nsp) {
