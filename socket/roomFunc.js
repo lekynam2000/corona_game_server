@@ -110,6 +110,9 @@ async function quarantine(socket, roomId, nsp, pList) {
         ) {
           flag = false;
         }
+        else{
+          game.infected_num ++;
+        }
         game.players[id].quarantined = true;
         game.moved_num++;
       }
@@ -266,7 +269,29 @@ async function distribute_mask(socket, roomId, id, nsp, target_id) {
     handleError(error, socket);
   }
 }
-async function super_infect() {}
+async function super_infect(socket,roomId,id,nsp,target_id) {
+  const room = await Room.findById(roomId);
+    const game = await Game.findById(room.game);
+    const index = inArray(game.players, id, '_id');
+    if (index < 0 || (game.players[index].role != roles.super_infected && game.players[index].role != roles.super_infected_hidden)) {
+      return socket.emit('errorGame', { msg: 'Not valid id' });
+    }
+    if(!game.players[target_id] || game.players[target_id].place != game.players[index].place){
+      return socket.emit('errorGame', { msg: 'Not valid target' });
+    }
+    if(game.players[index].had_infect || game.players[index].quarantined){
+      return socket.emit('errorGame',{msg: 'Cannot infect'})
+    }
+    game.players[target_id].infected = true;
+    game.infected_num ++;
+    if(game.infected_num == game.quara_num){
+      game.phase = phases.random_infect
+    }
+    await game.save();
+    if(game.phase == phases.random_infect){
+      nsp.emit('changePhase',game.phase);
+    }
+}
 async function random_infect() {}
 async function endPhase() {}
 async function endGame() {}

@@ -79,6 +79,10 @@ const GameSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  infected_num:{
+    type: Number,
+    default: 0
+  }
 });
 module.exports = Game = mongoose.model('games', GameSchema);
 
