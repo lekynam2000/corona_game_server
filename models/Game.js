@@ -23,6 +23,10 @@ const GameSchema = new mongoose.Schema({
   },
   players: [
     {
+      r_id: {
+        type: String,
+        require: true,
+      },
       arr_id: {
         type: Number,
         require: true,
@@ -79,10 +83,10 @@ const GameSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
-  infected_num:{
+  infected_num: {
     type: Number,
-    default: 0
-  }
+    default: 0,
+  },
 });
 module.exports = Game = mongoose.model('games', GameSchema);
 

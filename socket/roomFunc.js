@@ -3,7 +3,11 @@ const Room = require('../models/Room');
 const Game = require('../models/Game');
 const roles = require('../enum/roles');
 const phases = require('../enum/phases');
-module.exports = async function (socket) {};
+module.exports = async function (socket) {
+  const nsp = socket.nsp;
+  const roomId = nsp.name.split('_')[1];
+  const id = socket.handshake.query.id;
+};
 function inArray(array, id, keyCompare = null) {
   let index;
   array.forEach((el, _index) => {
@@ -22,12 +26,13 @@ function inArray(array, id, keyCompare = null) {
   }
   return -1;
 }
+async function reconnect(socket, roomId, nsp, id) {}
 async function addPlayer(socket, name, roomId, nsp) {
   try {
     const room = await Room.findById(roomId);
     room.players.push({ name, connected: true });
     await room.save();
-    socket.emit('getId', { id: room.players[-1]._id });
+    socket.emit('getId', { id: room.players[-1].id });
     nsp.emit('updatePlayers', {
       players: room.players.map((p) => ({
         name: p.name,
@@ -57,10 +62,14 @@ async function gameStart(socket, roomId, nsp) {
       });
     }
     const newGame = {};
-    newGame['players'] = room.players.map((player) => ({
-      name: player.name,
-      role: player.role,
-    }));
+    newGame['players'] = room.players.map((player) => {
+      player.playing = true;
+      return {
+        r_id: player.id.toString(),
+        name: player.name,
+        role: player.role,
+      };
+    });
     let quara_num = 0;
     for (let id in newGame['players']) {
       player = newGame['players'][id];
@@ -86,14 +95,16 @@ async function gameStart(socket, roomId, nsp) {
     newGame['quara_num'] = quara_num;
     newGame['target_point'] = room.target_point;
     const game = new Game(newGame);
+    room.playing = true;
     await game.save();
+    await room.save();
     console.log(game);
     nsp.emit('startGame', { game });
   } catch (error) {
     handleError(error, socket);
   }
 }
-async function beginPhase() {}
+// async function beginPhase() {}
 async function quarantine(socket, roomId, nsp, pList) {
   try {
     const room = await Room.findById(roomId);
