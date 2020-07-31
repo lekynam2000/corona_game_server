@@ -28,7 +28,13 @@ async function addPlayer(socket, name, roomId, nsp) {
     room.players.push({ name, connected: true });
     await room.save();
     socket.emit('getId', { id: room.players[-1]._id });
-    nsp.emit('updatePlayers', { players: room.players });
+    nsp.emit('updatePlayers', {
+      players: room.players.map((p) => ({
+        name: p.name,
+        connected: p.connected,
+        playing: p.playing,
+      })),
+    });
   } catch (error) {
     handleError(error, socket);
   }
@@ -456,7 +462,13 @@ async function disconnect(socket, id, roomId, nsp) {
     }
     room.players[index].connected = false;
     await room.save();
-    nsp.emit('updatePlayers', { players: room.players });
+    nsp.emit('updatePlayers', {
+      players: room.players.map((p) => ({
+        name: p.name,
+        connected: p.connected,
+        playing: p.playing,
+      })),
+    });
   } catch (error) {
     handleError(error, socket);
   }
