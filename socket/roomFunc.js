@@ -130,7 +130,13 @@ async function gameStart(socket, roomId, nsp) {
     handleError(error, socket);
   }
 }
-async function getBasicGameInfo(nsp, game) {
+async function basicInfo(nsp, game) {
+  let map = game.map;
+  let target_point = game.target_point;
+  let point = game.point;
+  let phase = game.phase;
+  let infect_num = game.infect_num;
+  let turn = game.turn;
   let players = game.players.map((p) => {
     return {
       name: p.name,
@@ -138,6 +144,12 @@ async function getBasicGameInfo(nsp, game) {
       quarantined: p.quarantined,
     };
   });
+  nsp.emit(se.basicSetup, { map, target_point });
+  nsp.emit(se.updatePoint, point);
+  nsp.emit(se.changePhase, phase);
+  nsp.emit(se.updateInfected, infect_num);
+  nsp.emit(se.updateTurn, turn);
+  nsp.emit(se.updateMove, { players });
 }
 async function getInfo(socket, roomId, r_id) {
   try {

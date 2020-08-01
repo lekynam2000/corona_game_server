@@ -1,6 +1,8 @@
 const server_emit = {
   getId: 'getId',
   //{id: player room id}
+  basicSetup: 'basicSetup',
+  //{map,target_point}
   updatePlayers: 'updatePlayers',
   //{players: [name,connected,playing]}
   startGame: 'startGame',
