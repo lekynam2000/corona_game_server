@@ -29,8 +29,6 @@ const client_emit = {
   //name
   reconnect: 'reconnect',
   //r_id
-  gameStart: 'gameStart',
-  //
   getInfo: 'getInfo',
   //r_id
   quarantine: 'quarantine',
@@ -46,4 +44,4 @@ const client_emit = {
   super_infect: 'super_infect',
   //{id,target_id}
 };
-module.exports = { server_emit };
+module.exports = { server_emit, client_emit };

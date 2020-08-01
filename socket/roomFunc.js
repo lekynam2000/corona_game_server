@@ -4,14 +4,36 @@ const Game = require('../models/Game');
 const roles = require('../enum/roles');
 const phases = require('../enum/phases');
 const se = require('./socket-spec').server_emit;
+const ce = require('./socket-spec').client_emit;
 module.exports = async function (socket) {
   const nsp = socket.nsp;
   const roomId = nsp.name.split('_')[1];
-  socket.on('addPlayer', (name) => {
+  socket.on(ce.addPlayer, (name) => {
     addPlayer(socket, name, roomId, nsp);
   });
-  socket.on('reconnect', (r_id) => {
+  socket.on(ce.reconnect, (r_id) => {
     reconnect(socket, r_id, roomId, nsp);
+  });
+  socket.on(ce.getInfo, (r_id) => {
+    getInfo(socket, roomId, r_id);
+  });
+  socket.on(ce.quarantine, (msg) => {
+    quarantine(socket, msg.id, rooId, nsp, msg.pList);
+  });
+  socket.on(ce.move, (msg) => {
+    move(socket, roomId, nsp, msg.arr_id, msg.target);
+  });
+  socket.on(ce.doctor_scan, (id) => {
+    doctor_scan(socket, roomId, id, nsp);
+  });
+  socket.on(ce.doctor_cure, (msg) => {
+    doctor_cure(socket, roomId, id, nsp, target_id);
+  });
+  socket.on(ce.distribute_mask, (msg) => {
+    distribute_mask(socket, roomId, msg.id, nsp, msg.target_id);
+  });
+  socket.on(ce.super_infect, (msg) => {
+    super_infect(socket, roomId, msg.id, nsp, msg.target_id);
   });
 };
 function inArray(array, id, keyCompare = null) {
