@@ -157,13 +157,17 @@ async function getInfo(socket, roomId, r_id) {
   }
 }
 // async function beginPhase() {}
-async function quarantine(socket, roomId, nsp, pList) {
+async function quarantine(socket, id, roomId, nsp, pList) {
   try {
     const room = await Room.findById(roomId);
     const game = await Game.findById(room.game);
     flag = true;
     if (game.phase != phases.quarantine) {
       return nsp.emit(se.errorGame, { msg: 'Quarantine in wrong phase' });
+    }
+    const index = inArray(game.players, id, '_id');
+    if (index < 0 || game.players[index].role != roles.police) {
+      return socket.emit(se.errorGame, { msg: 'Not valid id' });
     }
     if (game.turn > 0) {
       for (let id of pList) {
