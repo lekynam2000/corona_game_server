@@ -3,10 +3,16 @@ const Room = require('../models/Room');
 const Game = require('../models/Game');
 const roles = require('../enum/roles');
 const phases = require('../enum/phases');
+const se = require('./socket-spec').server_emit;
 module.exports = async function (socket) {
   const nsp = socket.nsp;
   const roomId = nsp.name.split('_')[1];
-  const id = socket.handshake.query.id;
+  socket.on('addPlayer', (name) => {
+    addPlayer(socket, name, roomId, nsp);
+  });
+  socket.on('reconnect', (r_id) => {
+    reconnect(socket, r_id, roomId, nsp);
+  });
 };
 function inArray(array, id, keyCompare = null) {
   let index;
@@ -26,14 +32,34 @@ function inArray(array, id, keyCompare = null) {
   }
   return -1;
 }
-async function reconnect(socket, roomId, nsp, id) {}
 async function addPlayer(socket, name, roomId, nsp) {
   try {
     const room = await Room.findById(roomId);
     room.players.push({ name, connected: true });
     await room.save();
-    socket.emit('getId', { id: room.players[-1].id });
-    nsp.emit('updatePlayers', {
+    socket.emit(se.getId, { id: room.players[-1].id });
+    nsp.emit(se.updatePlayers, {
+      players: room.players.map((p) => ({
+        name: p.name,
+        connected: p.connected,
+        playing: p.playing,
+      })),
+    });
+  } catch (error) {
+    handleError(error, socket);
+  }
+}
+async function reconnect(socket, r_id, roomId, nsp) {
+  try {
+    const room = await Room.findById(roomId);
+    const game = await Game.findById(room.game);
+    const r_index = inArray(room.players, r_id, '_id');
+    if (r_index < 0) {
+      return socket.emit(se.errorGame, { msg: 'Invalid id' });
+    }
+    room.players.connected = true;
+    await room.save();
+    nsp.emit(se.updatePlayers, {
       players: room.players.map((p) => ({
         name: p.name,
         connected: p.connected,
@@ -57,7 +83,7 @@ async function gameStart(socket, roomId, nsp) {
       }
     }
     if (!flag) {
-      return socket.emit('errorGame', {
+      return socket.emit(se.errorGame, {
         msg: 'Player is not assigned role or player is not connected',
       });
     }
@@ -99,7 +125,33 @@ async function gameStart(socket, roomId, nsp) {
     await game.save();
     await room.save();
     console.log(game);
-    nsp.emit('startGame', { game });
+    nsp.emit(se.startGame, { game });
+  } catch (error) {
+    handleError(error, socket);
+  }
+}
+async function getBasicGameInfo(nsp, game) {
+  let players = game.players.map((p) => {
+    return {
+      name: p.name,
+      place: p.place,
+      quarantined: p.quarantined,
+    };
+  });
+}
+async function getInfo(socket, roomId, r_id) {
+  try {
+    const room = await Room.findById(roomId);
+    if (!room.playing || room.game) {
+      return socket.emit(se.errorGame, { msg: 'Not playing room' });
+    }
+    const game = await Game.findById(room.game);
+    const index = inArray(game.players, r_id, 'r_id');
+    if (index < 0) {
+      return socket.emit(se.errorGame, { msg: 'Not found' });
+    }
+    const player = game.players[index];
+    socket.emit(se.myInfo, player);
   } catch (error) {
     handleError(error, socket);
   }
@@ -111,7 +163,7 @@ async function quarantine(socket, roomId, nsp, pList) {
     const game = await Game.findById(room.game);
     flag = true;
     if (game.phase != phases.quarantine) {
-      return nsp.emit('errorGame', { msg: 'Quarantine in wrong phase' });
+      return nsp.emit(se.errorGame, { msg: 'Quarantine in wrong phase' });
     }
     if (game.turn > 0) {
       for (let id of pList) {
@@ -120,7 +172,7 @@ async function quarantine(socket, roomId, nsp, pList) {
           game.players[id].role == roles.mask_distributor ||
           game.players[id].role == roles.police
         ) {
-          return socket.emit('errorGame', {
+          return socket.emit(se.errorGame, {
             msg: 'Special Role cannot be quarantined',
           });
         }
@@ -141,15 +193,15 @@ async function quarantine(socket, roomId, nsp, pList) {
       }
       game.phase = phases.move;
       await game.save();
-      nsp.emit('updateMove', {
+      nsp.emit(se.updateMove, {
         players: game.players.map((p) => ({
           arr_id: p.arr_id,
           place: p.place,
           name: p.name,
-          quarantined: p.quarantine,
+          quarantined: p.quarantined,
         })),
       });
-      nsp.emit('changePhase', game.phase);
+      nsp.emit(se.changePhase, game.phase);
     }
   } catch (error) {
     handleError(error, socket);
@@ -160,7 +212,7 @@ async function move(socket, roomId, nsp, arr_id, target) {
     const room = await Room.findById(roomId);
     const game = await Game.findById(room.game);
     if (game.phase != phases.move) {
-      return nsp.emit('errorGame', { msg: 'Move in wrong phase' });
+      return nsp.emit(se.errorGame, { msg: 'Move in wrong phase' });
     }
     // const player = game.players[arr_id];
     const curr = player.place;
@@ -168,12 +220,12 @@ async function move(socket, roomId, nsp, arr_id, target) {
       game.players[arr_id].moved ||
       game.players[arr_id].role == roles.police
     ) {
-      return socket.emit('errorGame', {
+      return socket.emit(se.errorGame, {
         msg: 'Unable to move',
       });
     }
     if (curr != -1 && !game.map[curr][target]) {
-      return socket.emit('errorGame', {
+      return socket.emit(se.errorGame, {
         msg: 'Cannot move to unconnected place',
       });
     }
@@ -200,17 +252,17 @@ async function move(socket, roomId, nsp, arr_id, target) {
     }
     await game.save();
     if (game.moved_num == game.players.length - 1) {
-      nsp.emit('updateMove', {
+      nsp.emit(se.updateMove, {
         players: game.players.map((p) => ({
           arr_id: p.arr_id,
           place: p.place,
           name: p.name,
-          quarantined: p.quarantine,
+          quarantined: p.quarantined,
         })),
       });
     }
     if (game.phase != phases.moved) {
-      nsp.emit('changePhase', game.phase);
+      nsp.emit(se.changePhase, game.phase);
     }
   } catch (error) {
     handleError(error, socket);
@@ -221,11 +273,11 @@ async function doctor_scan(socket, roomId, id, nsp) {
     const room = await Room.findById(roomId);
     const game = await Game.findById(room.game);
     if (game.phase != phases.doctor_scan) {
-      return nsp.emit('errorGame', { msg: 'Scan in wrong phase' });
+      return nsp.emit(se.errorGame, { msg: 'Scan in wrong phase' });
     }
     const index = inArray(game.players, id, '_id');
     if (index < 0 || game.players[index].role != roles.doctor) {
-      return socket.emit('errorGame', { msg: 'Not valid id' });
+      return socket.emit(se.errorGame, { msg: 'Not valid id' });
     } else {
       let place = game.players[index].place;
       let infect_list = [];
@@ -244,8 +296,8 @@ async function doctor_scan(socket, roomId, id, nsp) {
         game.phase = phases.distribute_mask;
       }
       await game.save();
-      socket.emit('scanResult', infect_list);
-      nsp.emit('changePhase', game.phase);
+      socket.emit(se.scanResult, infect_list);
+      nsp.emit(se.changePhase, game.phase);
     }
   } catch (error) {
     handleError(error, socket);
@@ -256,15 +308,15 @@ async function doctor_cure(socket, roomId, id, nsp, target_id) {
     const room = await Room.findById(roomId);
     const game = await Game.findById(room.game);
     if (game.phase != phases.doctor_cure) {
-      return nsp.emit('errorGame', { msg: 'Cure in wrong phase' });
+      return nsp.emit(se.errorGame, { msg: 'Cure in wrong phase' });
     }
     const index = inArray(game.players, id, '_id');
     if (index < 0 || game.players[index].role != roles.doctor) {
-      return socket.emit('errorGame', { msg: 'Not valid id' });
+      return socket.emit(se.errorGame, { msg: 'Not valid id' });
     } else {
       let target = game.players[target_id];
       if (!target) {
-        return socket.emit('errorGame', { msg: 'Not valid target' });
+        return socket.emit(se.errorGame, { msg: 'Not valid target' });
       }
       if (target.place == 6 && target.infected) {
         if (
@@ -275,9 +327,9 @@ async function doctor_cure(socket, roomId, id, nsp, target_id) {
         }
         game.phase = phases.distribute_mask;
         await game.save();
-        nsp.emit('changePhase', game.phase);
+        nsp.emit(se.changePhase, game.phase);
       } else {
-        socket.emit('errorGame', { msg: 'What are you doing doctor?' });
+        socket.emit(se.errorGame, { msg: 'What are you doing doctor?' });
       }
     }
   } catch (error) {
@@ -289,22 +341,22 @@ async function distribute_mask(socket, roomId, id, nsp, target_id) {
     const room = await Room.findById(roomId);
     const game = await Game.findById(room.game);
     if (game.phase != phases.distribute_mask) {
-      return nsp.emit('errorGame', { msg: 'Distribute mask in wrong phase' });
+      return nsp.emit(se.errorGame, { msg: 'Distribute mask in wrong phase' });
     }
     const index = inArray(game.players, id, '_id');
     if (index < 0 || game.players[index].role != roles.mask_distributor) {
-      return socket.emit('errorGame', { msg: 'Not valid id' });
+      return socket.emit(se.errorGame, { msg: 'Not valid id' });
     } else {
       if (
         !game.players[target_id] ||
         game.players[target_id].place != game.players[index].place
       ) {
-        return socket.emit('errorGame', { msg: 'Not valid target' });
+        return socket.emit(se.errorGame, { msg: 'Not valid target' });
       }
       game.players[target_id].has_mask = true;
       game.phase = phases.super_infect;
       await game.save();
-      nsp.emit('changePhase', game.phase);
+      nsp.emit(se.changePhase, game.phase);
     }
   } catch (error) {
     handleError(error, socket);
@@ -315,7 +367,7 @@ async function super_infect(socket, roomId, id, nsp, target_id) {
     const room = await Room.findById(roomId);
     const game = await Game.findById(room.game);
     if (game.phase != phases.super_infect) {
-      return nsp.emit('errorGame', { msg: 'Super infect in wrong phase' });
+      return nsp.emit(se.errorGame, { msg: 'Super infect in wrong phase' });
     }
     const index = inArray(game.players, id, '_id');
     if (
@@ -323,7 +375,7 @@ async function super_infect(socket, roomId, id, nsp, target_id) {
       (game.players[index].role != roles.super_infected &&
         game.players[index].role != roles.super_infected_hidden)
     ) {
-      return socket.emit('errorGame', { msg: 'Not valid id' });
+      return socket.emit(se.errorGame, { msg: 'Not valid id' });
     }
     if (
       !game.players[target_id] ||
@@ -331,10 +383,10 @@ async function super_infect(socket, roomId, id, nsp, target_id) {
       game.players[target_id].role == roles.doctor ||
       game.players[target_id].role == roles.doctor
     ) {
-      return socket.emit('errorGame', { msg: 'Not valid target' });
+      return socket.emit(se.errorGame, { msg: 'Not valid target' });
     }
     if (game.players[index].had_infect || game.players[index].quarantined) {
-      return socket.emit('errorGame', { msg: 'Cannot infect' });
+      return socket.emit(se.errorGame, { msg: 'Cannot infect' });
     }
     if (!game.players[index].has_mask && !game.players[target_id].has_mask) {
       game.players[target_id].infected = true;
@@ -345,7 +397,7 @@ async function super_infect(socket, roomId, id, nsp, target_id) {
     }
     await game.save();
     if (game.phase == phases.random_infect) {
-      nsp.emit('changePhase', game.phase);
+      nsp.emit(se.changePhase, game.phase);
     }
   } catch (error) {
     handleError(error, socket);
@@ -356,7 +408,7 @@ async function random_infect(roomId, nsp) {
     const room = await Room.findById(roomId);
     const game = await Game.findById(room.game);
     if (game.phase != phases.random_infect) {
-      return nsp.emit('errorGame', { msg: 'Random infect in wrong phase' });
+      return nsp.emit(se.errorGame, { msg: 'Random infect in wrong phase' });
     }
     // each element represent set of players in the place
     const place = [];
@@ -400,7 +452,7 @@ async function random_infect(roomId, nsp) {
     }
     game.phase = phases.endPhase;
     await game.save();
-    nsp.emit('changePhase', game.phase);
+    nsp.emit(se.changePhase, game.phase);
   } catch (error) {
     handleError(error, nsp);
   }
@@ -410,7 +462,7 @@ async function endPhase(roomId, nsp) {
     const room = await Room.findById(roomId);
     const game = await Game.findById(room.game);
     if (game.phase != phases.endPhase) {
-      return nsp.emit('errorGame', { msg: 'Random infect in wrong phase' });
+      return nsp.emit(se.errorGame, { msg: 'Random infect in wrong phase' });
     }
     let infect_num = calcInfection(game.players);
     game.point += infect_num;
@@ -427,8 +479,8 @@ async function endPhase(roomId, nsp) {
       }
     }
     await game.save();
-    nsp.emit('updateTurn', game.turn);
-    nsp.emit('updateMove', {
+    nsp.emit(se.updateTurn, game.turn);
+    nsp.emit(se.updateMove, {
       players: game.players.map((p) => ({
         arr_id: p.arr_id,
         place: p.place,
@@ -436,9 +488,9 @@ async function endPhase(roomId, nsp) {
         quarantined: p.quarantined,
       })),
     });
-    nsp.emit('updatePhase', game.phase);
-    nsp.emit('updateInfected', infect_num);
-    nsp.emit('updatePoint', game.point);
+    nsp.emit(se.changePhase, game.phase);
+    nsp.emit(se.updateInfected, infect_num);
+    nsp.emit(se.updatePoint, game.point);
     if (game.point >= game.target_point) {
       endGame(roomId, nsp, false);
     }
@@ -460,20 +512,20 @@ async function endGame(roomId, nsp, good_win) {
     p.playing = false;
   });
   await room.save();
-  nsp.emit('endGame', { msg });
+  nsp.emit(se.endGame, { msg });
 }
 async function disconnect(socket, id, roomId, nsp) {
   try {
     const room = await Room.findById(roomId);
     let index = inArray(room.players, id, '_id');
     if (index < 0) {
-      return socket.emit('errorGame', {
+      return socket.emit(se.errorGame, {
         msg: 'Bad Request: player already disconnect',
       });
     }
     room.players[index].connected = false;
     await room.save();
-    nsp.emit('updatePlayers', {
+    nsp.emit(se.updatePlayers, {
       players: room.players.map((p) => ({
         name: p.name,
         connected: p.connected,
@@ -516,7 +568,7 @@ function calcInfection(players) {
   return infect;
 }
 function handleError(error, socket) {
-  socket.emit('errorGame', { msg: 'Internal Server Error' });
+  socket.emit(se.errorGame, { msg: 'Internal Server Error' });
   console.error(error);
 }
 function getRandomInt(max) {
