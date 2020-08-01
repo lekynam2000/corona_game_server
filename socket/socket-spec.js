@@ -5,8 +5,6 @@ const server_emit = {
   //{map,target_point}
   updatePlayers: 'updatePlayers',
   //{players: [name,connected,playing]}
-  startGame: 'startGame',
-  //{}
   myInfo: 'myInfo',
   //{_id,arr_id,r_id,name,role,infected,disabled,has_mask,had_infect,place,moved,quarantined}
   updateMove: 'updateMove',

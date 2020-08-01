@@ -66,6 +66,7 @@ async function reconnect(socket, r_id, roomId, nsp) {
         playing: p.playing,
       })),
     });
+    extractBasicInfo(socket, game);
   } catch (error) {
     handleError(error, socket);
   }
@@ -125,12 +126,12 @@ async function gameStart(socket, roomId, nsp) {
     await game.save();
     await room.save();
     console.log(game);
-    nsp.emit(se.startGame, { game });
+    extractBasicInfo(nsp, game);
   } catch (error) {
     handleError(error, socket);
   }
 }
-async function basicInfo(nsp, game) {
+async function extractBasicInfo(nsp, game) {
   let map = game.map;
   let target_point = game.target_point;
   let point = game.point;
