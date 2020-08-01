@@ -1,0 +1,4 @@
+[submodule "corona_game_client"]
+	path = corona_game_client
+	url = https://github.com/lekynam2000/corona_game_client.git
+	branch = master
