@@ -43,6 +43,44 @@ router.post('/room', auth, async (req, res) => {
   }
 });
 
+// @route DELETE api/game/room/:id/:p_id
+// @desc delete player in game room
+// @access Private
+router.delete('/room/:id/:p_id', auth, async (req, res) => {
+  try {
+    const room = await Room.findById(req.params.id);
+    if (!room) {
+      return res.status(404).json({ msg: 'Not Found Room' });
+    }
+    if (room.admin.toString() != req.user.id) {
+      return res.status(401).json({ msg: 'Unauthorized' });
+    }
+    for (let player of room.players) {
+      if (player.connected) {
+        return res
+          .status(400)
+          .json({ msg: 'Cannot delete room with players connected' });
+      }
+    }
+    let delete_id = -1;
+    for (let id in room.players) {
+      if (room.players[id].id == req.params.p_id) {
+        delete_id = id;
+        break;
+      }
+    }
+    if (delete_id < 0) {
+      return res.status(400).json({ msg: 'Bad request' });
+    }
+    room.players.splice(delete_id, 1);
+    await room.save();
+    res.json(room);
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).json({ msg: 'Server error' });
+  }
+});
+
 // @route DELETE api/game/room/:id
 // @desc delete game room
 // @access Private
@@ -70,6 +108,7 @@ router.delete('/room/:id', auth, async (req, res) => {
         room_index = index;
       }
     });
+    await user.save();
     if (room_index > -1) {
       user.rooms.splice(room_index, 1);
     } else {
@@ -77,6 +116,34 @@ router.delete('/room/:id', auth, async (req, res) => {
     }
     await room.remove();
     res.json('Room deleted');
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// @route PUT api/game/room/:id/roles
+// @desc update roles
+// @access Private
+router.put('/room/:id/roles', auth, async (req, res) => {
+  try {
+    const room = await Room.findById(req.params.id);
+    if (!room) {
+      return res.status(404).json({ msg: 'Not Found Room' });
+    }
+    if (room.admin.toString() != req.user.id) {
+      return res.status(401).json({ msg: 'Unauthorized' });
+    }
+    let roles = req.body.roles;
+    for (let player of room.players) {
+      if (roles[player.id]) {
+        player.role = roles[player.id];
+      } else {
+        player.role = null;
+      }
+    }
+    await room.save();
+    res.json(room);
   } catch (err) {
     console.error(err.message);
     return res.status(500).json({ msg: 'Server error' });
