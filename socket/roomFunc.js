@@ -11,6 +11,9 @@ module.exports = async function (socket) {
   socket.on(ce.addPlayer, (name) => {
     addPlayer(socket, name, roomId, nsp);
   });
+  socket.on(ce.gameStart, () => {
+    gameStart(socket, roomId, nsp);
+  });
   socket.on(ce.reconnect, (r_id) => {
     reconnect(socket, r_id, roomId, nsp);
   });

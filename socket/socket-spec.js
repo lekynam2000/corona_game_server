@@ -28,7 +28,9 @@ const client_emit = {
   addPlayer: 'addPlayer',
   //name
   reconnect: 'reconnect',
-  //r_id
+  //r_id,
+  gameStart: 'gameStart',
+  //
   getInfo: 'getInfo',
   //r_id
   quarantine: 'quarantine',
