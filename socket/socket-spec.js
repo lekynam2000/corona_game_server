@@ -24,4 +24,26 @@ const server_emit = {
   errorGame: 'errorGame',
   //{msg}
 };
+const client_emit = {
+  addPlayer: 'addPlayer',
+  //name
+  reconnect: 'reconnect',
+  //r_id
+  gameStart: 'gameStart',
+  //
+  getInfo: 'getInfo',
+  //r_id
+  quarantine: 'quarantine',
+  //{id,pList:[arr_id]}
+  move: 'move',
+  //{arr_id,target:place}
+  doctor_scan: 'doctor_scan',
+  //id
+  doctor_cure: 'doctor_cure',
+  //{id,target_id}
+  distribute_mask: 'distribute_mask',
+  //{id,target_id}
+  super_infect: 'super_infect',
+  //{id,target_id}
+};
 module.exports = { server_emit };
