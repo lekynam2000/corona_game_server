@@ -169,7 +169,7 @@ router.put('/room/:id/roles', auth, async (req, res) => {
 // @route PUT api/game/room/:id/point
 // @desc update target point
 // @access Private
-router.put('/room/:id/roles', auth, async (req, res) => {
+router.put('/room/:id/point', auth, async (req, res) => {
   try {
     const room = await Room.findById(req.params.id);
     if (!room) {
