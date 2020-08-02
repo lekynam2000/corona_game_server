@@ -20,5 +20,9 @@
     "mongoose": "^5.8.11",
     "socket.io": "^2.3.0",
     "socketio-jwt-auth": "^0.1.0"
+  },
+  "devDependencies": {
+    "concurrently": "^5.1.0",
+    "nodemon": "^2.0.2"
   }
 }
