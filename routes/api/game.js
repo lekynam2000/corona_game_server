@@ -6,17 +6,33 @@ const Room = require('../../models/Room');
 const User = require('../../models/User');
 // const Game = require('../../models/Game');
 
-// @route GET api/game/room
+// @route GET api/game/rooms
 // @desc get current player rooms
 // @access Private
 
-router.get('/room', auth, async (req, res) => {
+router.get('/rooms', auth, async (req, res) => {
   try {
     const admin = await User.findById(req.user.id);
-    const rooms = await Room.find({
-      _id: { $in: admin.rooms },
-    });
+    const rooms = admin.rooms;
     res.send(rooms);
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).json({ msg: 'Server error' });
+  }
+});
+// @route GET api/game/rooms
+// @desc get current player rooms
+// @access Private
+router.get('/room/:id', auth, async (req, res) => {
+  try {
+    const room = await Room.findById(req.params.id);
+    if (!room) {
+      return res.status(404).json({ msg: 'Not found room' });
+    }
+    if (room.admin.toString() != req.user.id) {
+      return res.status(401).json({ msg: 'Not authenticated' });
+    }
+    res.send(room);
   } catch (err) {
     console.error(err.message);
     return res.status(500).json({ msg: 'Server error' });
