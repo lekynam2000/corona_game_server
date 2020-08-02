@@ -124,13 +124,13 @@ router.delete('/room/:id', auth, async (req, res) => {
         room_index = index;
       }
     });
-    await user.save();
     if (room_index > -1) {
       user.rooms.splice(room_index, 1);
     } else {
       return res.status(404).json({ msg: 'Not found room belong to admin' });
     }
     await room.remove();
+    await user.save();
     res.json(user.rooms);
   } catch (err) {
     console.error(err.message);
