@@ -159,7 +159,7 @@ router.put('/room/:id/roles', auth, async (req, res) => {
       }
     }
     await room.save();
-    res.json(room.roles);
+    res.json(room.players);
   } catch (err) {
     console.error(err.message);
     return res.status(500).json({ msg: 'Server error' });
@@ -187,3 +187,4 @@ router.put('/room/:id/point', auth, async (req, res) => {
     return res.status(500).json({ msg: 'Server error' });
   }
 });
+module.exports = router;
