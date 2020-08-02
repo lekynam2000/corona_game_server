@@ -159,7 +159,29 @@ router.put('/room/:id/roles', auth, async (req, res) => {
       }
     }
     await room.save();
-    res.json(room);
+    res.json(room.roles);
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// @route PUT api/game/room/:id/point
+// @desc update target point
+// @access Private
+router.put('/room/:id/roles', auth, async (req, res) => {
+  try {
+    const room = await Room.findById(req.params.id);
+    if (!room) {
+      return res.status(404).json({ msg: 'Not Found Room' });
+    }
+    if (room.admin.toString() != req.user.id) {
+      return res.status(401).json({ msg: 'Unauthorized' });
+    }
+    let point = req.body.target_point;
+    room.target_point = point;
+    await room.save();
+    res.json(room.target_point);
   } catch (err) {
     console.error(err.message);
     return res.status(500).json({ msg: 'Server error' });
