@@ -52,7 +52,7 @@ router.post('/room', auth, async (req, res) => {
     const room = await newRoom.save();
     user.rooms.push(room._id);
     await user.save();
-    res.json(room);
+    res.json(room.id);
   } catch (err) {
     console.error(err.message);
     return res.status(500).json({ msg: 'Server error' });
@@ -131,7 +131,7 @@ router.delete('/room/:id', auth, async (req, res) => {
       return res.status(404).json({ msg: 'Not found room belong to admin' });
     }
     await room.remove();
-    res.json('Room deleted');
+    res.json(user.rooms);
   } catch (err) {
     console.error(err.message);
     return res.status(500).json({ msg: 'Server error' });
