@@ -83,6 +83,10 @@ async function addPlayer(socket, name, roomId, nsp) {
     nsp.emit(se.updatePlayers, {
       players: room.players,
     });
+    if (room.playing) {
+      const game = await Game.findById(room.game);
+      extractBasicInfo(socket, game);
+    }
     return room.players[-1].id;
   } catch (error) {
     handleError(error, socket);
@@ -331,6 +335,7 @@ async function move(socket, roomId, nsp, arr_id, target) {
     if (game.phase != phases.moved) {
       nsp.emit(se.changePhase, game.phase);
     }
+    socket.emit(se.myInfo, game.players[arr_id]);
   } catch (error) {
     handleError(error, socket);
   }

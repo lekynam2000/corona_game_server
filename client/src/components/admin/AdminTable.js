@@ -6,7 +6,7 @@ import api from '../../utils/api';
 import roles from '../../enum/roles';
 import { server_emit as se } from '../../enum/socket-spec';
 import io from 'socket.io-client';
-export const AdminTable = ({ match }) => {
+export const AdminTable = ({ match, setAlert }) => {
   const [targetPoint, setPoint] = useState(0);
   const [players, setPlayers] = useState([]);
   const [playing, setPlaying] = useState(false);
