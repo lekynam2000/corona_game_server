@@ -4,6 +4,8 @@ import { withRouter, Link } from 'react-router-dom';
 import { setAlert } from '../../actions/alert';
 import api from '../../utils/api';
 import roles from '../../enum/roles';
+import { server_emit as se } from '../../enum/socket-spec';
+import io from 'socket.io-client';
 export const AdminTable = ({ match }) => {
   const [targetPoint, setPoint] = useState(0);
   const [players, setPlayers] = useState([]);
@@ -24,6 +26,11 @@ export const AdminTable = ({ match }) => {
       setPlayers(room.players);
       setPoint(room.target_point);
       setPlaying(room.playing);
+      let socket = io(`/room_${match.params.id}`);
+      setSocket(socket);
+      socket.on(se.updatePlayers, (msg) => {
+        setPlayers(msg.players);
+      });
     });
   }, []);
   function changeTargetPoint(point) {

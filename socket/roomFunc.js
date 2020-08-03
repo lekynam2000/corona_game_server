@@ -64,11 +64,7 @@ async function addPlayer(socket, name, roomId, nsp) {
     await room.save();
     socket.emit(se.getId, { id: room.players[-1].id });
     nsp.emit(se.updatePlayers, {
-      players: room.players.map((p) => ({
-        name: p.name,
-        connected: p.connected,
-        playing: p.playing,
-      })),
+      players: room.players,
     });
   } catch (error) {
     handleError(error, socket);
@@ -85,11 +81,7 @@ async function reconnect(socket, r_id, roomId, nsp) {
     room.players.connected = true;
     await room.save();
     nsp.emit(se.updatePlayers, {
-      players: room.players.map((p) => ({
-        name: p.name,
-        connected: p.connected,
-        playing: p.playing,
-      })),
+      players: room.players,
     });
     extractBasicInfo(socket, game);
   } catch (error) {
@@ -568,11 +560,7 @@ async function disconnect(socket, id, roomId, nsp) {
     room.players[index].connected = false;
     await room.save();
     nsp.emit(se.updatePlayers, {
-      players: room.players.map((p) => ({
-        name: p.name,
-        connected: p.connected,
-        playing: p.playing,
-      })),
+      players: room.players,
     });
   } catch (error) {
     handleError(error, socket);
