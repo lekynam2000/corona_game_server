@@ -47,6 +47,18 @@ export const AdminTable = ({ match }) => {
   }
   function submitRole(roles) {
     console.log('roles', roles);
+    for (let key in remainRoles) {
+      if (remainRoles[key]) {
+        setAlert('Not enough role', 'danger');
+        return;
+      }
+    }
+    for (let key in roles) {
+      if (!roles.key) {
+        setAlert('Cannot set empty role', 'danger');
+        return;
+      }
+    }
     api.put(`/room/${match.params.id}/roles`, { roles }).then((res) => {
       setPlayers(res.data);
     });
