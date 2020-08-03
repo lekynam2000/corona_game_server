@@ -8,14 +8,19 @@ const ce = require('./socket-spec').client_emit;
 module.exports = async function (socket) {
   const nsp = socket.nsp;
   const roomId = nsp.name.split('_')[1];
+  let inScopeId = 0;
   socket.on(ce.addPlayer, (name) => {
-    addPlayer(socket, name, roomId, nsp);
+    addPlayer(socket, name, roomId, nsp).then((data) => {
+      inScopeId = data;
+    });
   });
   socket.on(ce.gameStart, () => {
     gameStart(socket, roomId, nsp);
   });
   socket.on(ce.reconnect, (r_id) => {
-    reconnect(socket, r_id, roomId, nsp);
+    reconnect(socket, r_id, roomId, nsp).then((data) => {
+      inScopeId = data;
+    });
   });
   socket.on(ce.getInfo, (r_id) => {
     getInfo(socket, roomId, r_id);
@@ -37,6 +42,18 @@ module.exports = async function (socket) {
   });
   socket.on(ce.super_infect, (msg) => {
     super_infect(socket, roomId, msg.id, nsp, msg.target_id);
+  });
+  socket.on(ce.force_disconnect, (id) => {
+    disconnect(socket, id, roomId, nsp).then(() => {
+      socket.disconnect();
+    });
+  });
+  socket.on('disconnect', () => {
+    if (inScopeId != 0) {
+      disconnect(socket, inScopeId, roomId, nsp);
+    } else {
+      console.error('Undefined Disconnection');
+    }
   });
 };
 function inArray(array, id, keyCompare = null) {
@@ -66,6 +83,7 @@ async function addPlayer(socket, name, roomId, nsp) {
     nsp.emit(se.updatePlayers, {
       players: room.players,
     });
+    return room.players[-1].id;
   } catch (error) {
     handleError(error, socket);
   }
@@ -83,7 +101,10 @@ async function reconnect(socket, r_id, roomId, nsp) {
     nsp.emit(se.updatePlayers, {
       players: room.players,
     });
-    extractBasicInfo(socket, game);
+    if (room.playing) {
+      extractBasicInfo(socket, game);
+    }
+    return r_id;
   } catch (error) {
     handleError(error, socket);
   }
@@ -143,6 +164,7 @@ async function gameStart(socket, roomId, nsp) {
     await game.save();
     await room.save();
     console.log(game);
+    nsp.emit(se.startGame, room.playing);
     extractBasicInfo(nsp, game);
   } catch (error) {
     handleError(error, socket);
@@ -151,18 +173,29 @@ async function gameStart(socket, roomId, nsp) {
 async function extractBasicInfo(nsp, game) {
   let map = game.map;
   let target_point = game.target_point;
+  let quara_num = game.quara_num;
   let point = game.point;
   let phase = game.phase;
   let infect_num = game.infect_num;
   let turn = game.turn;
+  let big3 = {
+    [roles.doctor]: -1,
+    [roles.police]: -1,
+    [roles.mask_distributor]: -1,
+  };
   let players = game.players.map((p) => {
+    for (let key in big3) {
+      if (key == p.role) {
+        big3[key] = p.arr_id;
+      }
+    }
     return {
       name: p.name,
       place: p.place,
       quarantined: p.quarantined,
     };
   });
-  nsp.emit(se.basicSetup, { map, target_point });
+  nsp.emit(se.basicSetup, { map, target_point, quara_num, big3 });
   nsp.emit(se.updatePoint, point);
   nsp.emit(se.changePhase, phase);
   nsp.emit(se.updateInfected, infect_num);
@@ -278,7 +311,7 @@ async function move(socket, roomId, nsp, arr_id, target) {
           }
         }
       }
-      if (flag) {
+      if (flag || game.turn == 0) {
         game.phase = phases.distribute_mask;
       } else {
         game.phase = phases.doctor_scan;
@@ -562,6 +595,7 @@ async function disconnect(socket, id, roomId, nsp) {
     nsp.emit(se.updatePlayers, {
       players: room.players,
     });
+    return true;
   } catch (error) {
     handleError(error, socket);
   }
