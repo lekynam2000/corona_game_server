@@ -21,6 +21,8 @@ export const server_emit = {
   //point
   endGame: 'endGame',
   //{msg}
+  detailChange: 'detailChange',
+  //{key,val}
   errorGame: 'errorGame',
   //{msg}
 };

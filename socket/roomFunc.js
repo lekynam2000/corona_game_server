@@ -335,7 +335,7 @@ async function move(socket, roomId, nsp, arr_id, target) {
     if (game.phase != phases.moved) {
       nsp.emit(se.changePhase, game.phase);
     }
-    socket.emit(se.myInfo, game.players[arr_id]);
+    socket.emit(se.detailChange, { key: 'moved', val: true });
   } catch (error) {
     handleError(error, socket);
   }
@@ -468,6 +468,7 @@ async function super_infect(socket, roomId, id, nsp, target_id) {
       game.phase = phases.random_infect;
     }
     await game.save();
+    socket.emit(se.detailChange, { key: 'had_infect', val: true });
     if (game.phase == phases.random_infect) {
       nsp.emit(se.changePhase, game.phase);
     }

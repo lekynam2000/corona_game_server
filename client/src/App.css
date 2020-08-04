@@ -1,0 +1,13 @@
+.playerIcon {
+  display: block;
+  position: absolute;
+  border: 1px solid black;
+  border-radius: 50%;
+  opacity: 80%;
+}
+.playerIcon.quarantine {
+  opacity: 30%;
+}
+.card-header img {
+  position: absolute;
+}
