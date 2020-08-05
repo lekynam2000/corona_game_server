@@ -32,6 +32,9 @@ export const AdminTable = ({ match, setAlert }) => {
       socket.on(se.updatePlayers, (msg) => {
         setPlayers(msg.players);
       });
+      socket.on(se.startGame, () => {
+        setPlaying(true);
+      });
     });
     return () => {
       if (socket) {
@@ -186,13 +189,17 @@ export const AdminTable = ({ match, setAlert }) => {
                   </button>
                 </th>
                 <th colSpan='2'>
-                  <button
-                    onClick={() => {
-                      startGame(mySocket);
-                    }}
-                  >
-                    Start
-                  </button>
+                  {playing ? (
+                    Started
+                  ) : (
+                    <button
+                      onClick={() => {
+                        startGame(mySocket);
+                      }}
+                    >
+                      Start
+                    </button>
+                  )}
                 </th>
               </tr>
             </tfoot>

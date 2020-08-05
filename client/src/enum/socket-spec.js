@@ -3,6 +3,8 @@ export const server_emit = {
   //{id: player room id}
   basicSetup: 'basicSetup',
   //{map,target_point}
+  startGame: 'startGame',
+  //{true}
   updatePlayers: 'updatePlayers',
   //{players: [name,connected,playing]}
   myInfo: 'myInfo',
