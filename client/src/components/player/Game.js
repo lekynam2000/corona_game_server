@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { setAlert } from '../../actions/alert';
+import { io } from 'socket.io-client';
 import roles from '../../enum/roles';
 import phases from '../../enum/phases';
 import { server_emit as se, client_emit as ce } from '../../enum/socket-spec';
@@ -301,11 +302,11 @@ export const Game = ({ match, setAlert }) => {
     <div className='row'>
       <div className='col-lg-2'>
         <ol className='list-group'>
-          {players.map((p) => {
+          {players.map((p) => (
             <li className='list-group-item'>
-              {p.name}: {p.place > -1 ? placeName[place] : 'None'}
-            </li>;
-          })}
+              {p.name}: {p.place > -1 ? placeName[p.place] : 'None'}
+            </li>
+          ))}
         </ol>
       </div>
       <div className='col-lg-7'>

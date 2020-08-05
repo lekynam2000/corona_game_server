@@ -190,7 +190,7 @@ export const AdminTable = ({ match, setAlert }) => {
                 </th>
                 <th colSpan='2'>
                   {playing ? (
-                    Started
+                    'Started'
                   ) : (
                     <button
                       onClick={() => {
