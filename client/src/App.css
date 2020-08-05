@@ -8,8 +8,15 @@
 .playerIcon.quarantine {
   opacity: 30%;
 }
+.places .card-header {
+  height: 120px;
+}
+.places .card-body {
+  height: 30px;
+  padding: 5px;
+  text-align: center;
+}
 .card-header img {
-  position: absolute;
   width: 100%;
   height: 100%;
 }

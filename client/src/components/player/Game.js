@@ -6,6 +6,14 @@ import io from 'socket.io-client';
 import roles from '../../enum/roles';
 import phases from '../../enum/phases';
 import { server_emit as se, client_emit as ce } from '../../enum/socket-spec';
+import Can2 from '../../img/canteen2.jpg';
+import theArc from '../../img/the_arc.jpg';
+import nyAudi from '../../img/ny_audi.jpg';
+import theHive from '../../img/the_hive.jpg';
+import YuuGar from '../../img/yg.jpg';
+import Hall6 from '../../img/hall6.jpg';
+import Fullerton from '../../img/fullerton.png';
+import Quara from '../../img/quara.jpg';
 export const Game = ({ match, setAlert }) => {
   const placeName = [
     'Canteen 2',
@@ -16,6 +24,7 @@ export const Game = ({ match, setAlert }) => {
     'Hall 6',
     'Fullerton',
   ];
+  const placeImg = [Can2, theArc, nyAudi, theHive, YuuGar, Hall6, Fullerton];
   const [logged, setLogged] = useState(false);
   const [mySocket, setSocket] = useState(null);
   const [playing, setPlaying] = useState(false);
@@ -354,7 +363,7 @@ export const Game = ({ match, setAlert }) => {
                       move(mySocket, i);
                     }}
                   >
-                    <div className={'card' + active ? ' active' : ''}>
+                    <div className={'card places' + (active ? ' active' : '')}>
                       <div className='card-header'>
                         {players.map((p) => {
                           if (p.place == i) {
@@ -364,7 +373,7 @@ export const Game = ({ match, setAlert }) => {
                           }
                         })}
                         <img
-                          src=''
+                          src={placeImg[i]}
                           alt={placeName[i]}
                           className='card-img-top'
                         />
@@ -377,7 +386,7 @@ export const Game = ({ match, setAlert }) => {
                 );
               })}
               <div className='col-lg-4 quaraZone'>
-                <div className={'card'}>
+                <div className={'card places'}>
                   <div className='card-header'>
                     {players.map((p) => {
                       if (p.quarantined) {
@@ -387,7 +396,7 @@ export const Game = ({ match, setAlert }) => {
                       }
                     })}
                     <img
-                      src=''
+                      src={Quara}
                       alt='Quarantine Zone'
                       className='card-img-top'
                     />
