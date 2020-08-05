@@ -116,6 +116,9 @@ async function reconnect(socket, r_id, roomId, nsp) {
 async function gameStart(socket, roomId, nsp) {
   try {
     const room = await Room.findById(roomId);
+    if (room.playing) {
+      socket.emit(se.errorGame, { msg: 'Room already playing' });
+    }
     let flag = true;
     for (let player of room.players) {
       if (!player.connected) {
@@ -168,7 +171,8 @@ async function gameStart(socket, roomId, nsp) {
     await game.save();
     await room.save();
     console.log(game);
-    nsp.emit(se.startGame, room.playing);
+    // nsp.emit(se.startGame, room.playing);
+    socket.emit(se.updatePlayers, { players: room.players });
     extractBasicInfo(nsp, game);
   } catch (error) {
     handleError(error, socket);
@@ -471,6 +475,7 @@ async function super_infect(socket, roomId, id, nsp, target_id) {
     socket.emit(se.detailChange, { key: 'had_infect', val: true });
     if (game.phase == phases.random_infect) {
       nsp.emit(se.changePhase, game.phase);
+      random_infect(roomId, nsp);
     }
   } catch (error) {
     handleError(error, socket);
@@ -526,6 +531,7 @@ async function random_infect(roomId, nsp) {
     game.phase = phases.endPhase;
     await game.save();
     nsp.emit(se.changePhase, game.phase);
+    endPhase(roomId, nsp);
   } catch (error) {
     handleError(error, nsp);
   }
