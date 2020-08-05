@@ -79,7 +79,7 @@ async function addPlayer(socket, name, roomId, nsp) {
     const room = await Room.findById(roomId);
     room.players.push({ name, connected: true });
     await room.save();
-    socket.emit(se.getId, { id: room.players[-1].id });
+    socket.emit(se.getId, { id: room.players[room.players.length - 1].id });
     nsp.emit(se.updatePlayers, {
       players: room.players,
     });
@@ -87,7 +87,7 @@ async function addPlayer(socket, name, roomId, nsp) {
       const game = await Game.findById(room.game);
       extractBasicInfo(socket, game);
     }
-    return room.players[-1].id;
+    return room.players[room.players.length - 1].id;
   } catch (error) {
     handleError(error, socket);
   }

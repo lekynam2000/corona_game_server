@@ -11,7 +11,7 @@ export const AdminTable = ({ match, setAlert }) => {
   const [players, setPlayers] = useState([]);
   const [playing, setPlaying] = useState(false);
   const [customPoint, setCustomPoint] = useState(200);
-  const [customRoles, setCustomRoles] = useState(null);
+  const [customRoles, setCustomRoles] = useState({});
   const [remainRoles, setRemainRoles] = useState({
     [roles.doctor]: true,
     [roles.police]: true,
@@ -44,7 +44,7 @@ export const AdminTable = ({ match, setAlert }) => {
   }, []);
   function changeTargetPoint(point) {
     api
-      .put(`/room/${match.params.id}/point`, { target_point: point })
+      .put(`/game/room/${match.params.id}/point`, { target_point: point })
       .then((res) => {
         setPoint(res.data);
       });
@@ -75,7 +75,7 @@ export const AdminTable = ({ match, setAlert }) => {
         return;
       }
     }
-    api.put(`/room/${match.params.id}/roles`, { roles }).then((res) => {
+    api.put(`/game/room/${match.params.id}/roles`, { roles }).then((res) => {
       setPlayers(res.data);
     });
   }
@@ -150,11 +150,12 @@ export const AdminTable = ({ match, setAlert }) => {
                   <td>
                     <select
                       name='roles'
-                      value={customRoles[p.id]}
+                      value={customRoles[p.id] || null}
                       onChange={(e) => {
                         onChangeRole(p.id, e.target.value);
                       }}
                     >
+                      <option value={null}>None</option>
                       {remainRoles[roles.doctor] && (
                         <option value={roles.doctor}>Doctor</option>
                       )}
@@ -171,7 +172,6 @@ export const AdminTable = ({ match, setAlert }) => {
                       )}
                       <option value={roles.super_infected}>Infector</option>
                       <option value={roles.normal}>Normal</option>
-                      <option value={null}>None</option>
                     </select>
                   </td>
                 </tr>
