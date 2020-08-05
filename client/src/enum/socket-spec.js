@@ -47,4 +47,6 @@ export const client_emit = {
   //{id,target_id}
   super_infect: 'super_infect',
   //{id,target_id}
+  force_disconnect: 'force_disconnect',
+  //{id}
 };

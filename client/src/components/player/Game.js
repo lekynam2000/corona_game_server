@@ -81,6 +81,9 @@ export const Game = ({ match, setAlert }) => {
         return myInfo;
       });
     });
+    return () => {
+      socket.emit(ce.force_disconnect, true);
+    };
   }, []);
   useEffect(() => {
     if (quara_num > 0 && myInfo.role == roles.police) {

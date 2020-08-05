@@ -4,7 +4,7 @@ import { withRouter, Link } from 'react-router-dom';
 import { setAlert } from '../../actions/alert';
 import api from '../../utils/api';
 import roles from '../../enum/roles';
-import { server_emit as se } from '../../enum/socket-spec';
+import { server_emit as se, client_emit as ce } from '../../enum/socket-spec';
 import io from 'socket.io-client';
 export const AdminTable = ({ match, setAlert }) => {
   const [targetPoint, setPoint] = useState(0);
@@ -21,17 +21,23 @@ export const AdminTable = ({ match, setAlert }) => {
   const [mySocket, setSocket] = useState(null);
 
   useEffect(() => {
+    let socket;
     api.get(`/game/room/${match.params.id}`).then((res) => {
       let room = res.data;
       setPlayers(room.players);
       setPoint(room.target_point);
       setPlaying(room.playing);
-      let socket = io(`/room_${match.params.id}`);
+      socket = io(`/room_${match.params.id}`);
       setSocket(socket);
       socket.on(se.updatePlayers, (msg) => {
         setPlayers(msg.players);
       });
     });
+    return () => {
+      if (socket) {
+        socket.emit(ce.force_disconnect, true);
+      }
+    };
   }, []);
   function changeTargetPoint(point) {
     api
@@ -69,6 +75,9 @@ export const AdminTable = ({ match, setAlert }) => {
     api.put(`/room/${match.params.id}/roles`, { roles }).then((res) => {
       setPlayers(res.data);
     });
+  }
+  function startGame(socket) {
+    socket.emit(ce.gameStart, true);
   }
   return (
     <div className='row'>
@@ -174,6 +183,15 @@ export const AdminTable = ({ match, setAlert }) => {
                     }}
                   >
                     Set Role
+                  </button>
+                </th>
+                <th colSpan='2'>
+                  <button
+                    onClick={() => {
+                      startGame(mySocket);
+                    }}
+                  >
+                    Start
                   </button>
                 </th>
               </tr>

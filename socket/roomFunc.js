@@ -43,17 +43,17 @@ module.exports = async function (socket) {
   socket.on(ce.super_infect, (msg) => {
     super_infect(socket, roomId, msg.id, nsp, msg.target_id);
   });
-  socket.on(ce.force_disconnect, (id) => {
-    disconnect(socket, id, roomId, nsp).then(() => {
-      socket.disconnect();
-    });
+  socket.on(ce.force_disconnect, () => {
+    if (inScopeId != 0) {
+      disconnect(socket, inScopeId, roomId, nsp);
+    }
+    socket.disconnect();
   });
   socket.on('disconnect', () => {
     if (inScopeId != 0) {
       disconnect(socket, inScopeId, roomId, nsp);
-    } else {
-      console.error('Undefined Disconnection');
     }
+    socket.disconnect();
   });
 };
 function inArray(array, id, keyCompare = null) {
