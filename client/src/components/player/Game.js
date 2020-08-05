@@ -404,7 +404,7 @@ export const Game = ({ match, setAlert }) => {
       <div className='col-lg-3'>
         <div className='card personalInfo'>
           <div className='card-body'>
-            Name: {myInfo.name}; Role: {myInfo.role}; Infected:{' '}
+            Name: {myInfo.name} Role: {myInfo.role} Infected:{' '}
             {myInfo.infected ? 'Yes' : 'No'}
             Mask: {myInfo.has_mask ? 'Yes' : 'No'}
             {myInfo.place > -1 && `Place: ${placeName[myInfo.place]}`}

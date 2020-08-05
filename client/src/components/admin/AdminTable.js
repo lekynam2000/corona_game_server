@@ -50,16 +50,23 @@ export const AdminTable = ({ match, setAlert }) => {
       });
   }
   function onChangeRole(id, role) {
+    let f = true;
     for (let key in remainRoles) {
+      if (role == key && remainRoles[key] == false) {
+        setAlert('Duplicated role', 'danger');
+        f = false;
+      }
       if (role != key && customRoles[id] == key) {
-        setRemainRoles({ ...remainRoles, key: true });
+        setRemainRoles({ ...remainRoles, [key]: true });
         break;
       } else if (role == key && customRoles[id] != key) {
         setRemainRoles({ ...remainRoles, [key]: false });
         break;
       }
     }
+
     setCustomRoles({ ...customRoles, [id]: role });
+    console.log(customRoles);
   }
   function submitRole(roles) {
     console.log('roles', roles);
@@ -70,7 +77,7 @@ export const AdminTable = ({ match, setAlert }) => {
       }
     }
     for (let key in roles) {
-      if (!roles.key) {
+      if (!roles[key]) {
         setAlert('Cannot set empty role', 'danger');
         return;
       }
@@ -160,38 +167,41 @@ export const AdminTable = ({ match, setAlert }) => {
               </tr>
             </thead>
             <tbody>
-              {players.map((p) => (
-                <tr>
-                  <td>{p.name}</td>
-                  <td>
-                    <select
-                      name='roles'
-                      value={customRoles[p.id] || null}
-                      onChange={(e) => {
-                        onChangeRole(p.id, e.target.value);
-                      }}
-                    >
-                      <option value={null}>None</option>
-                      {remainRoles[roles.doctor] && (
+              {players.map((player) => {
+                let p = player;
+                return (
+                  <tr>
+                    <td>{p.name}</td>
+                    <td>
+                      <select
+                        name='roles'
+                        value={customRoles[p._id]}
+                        onChange={(e) => {
+                          console.log(p._id, e.target.value);
+                          onChangeRole(p._id, e.target.value);
+                        }}
+                      >
+                        <option value={null}>None</option>
+
                         <option value={roles.doctor}>Doctor</option>
-                      )}
-                      {remainRoles[roles.police] && (
+
                         <option value={roles.police}>Police</option>
-                      )}
-                      {remainRoles[roles.mask_distributor] && (
-                        <option value={roles.doctor}>Mask Distributor</option>
-                      )}
-                      {remainRoles[roles.super_infected_hidden] && (
+
+                        <option value={roles.mask_distributor}>
+                          Mask Distributor
+                        </option>
+
                         <option value={roles.super_infected_hidden}>
                           Hidden Infector
                         </option>
-                      )}
-                      <option value={roles.super_infected}>Infector</option>
-                      <option value={roles.normal}>Normal</option>
-                    </select>
-                  </td>
-                </tr>
-              ))}
+
+                        <option value={roles.super_infected}>Infector</option>
+                        <option value={roles.normal}>Normal</option>
+                      </select>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
             <tfoot>
               <tr>

@@ -145,6 +145,7 @@ router.put('/room/:id/roles', auth, async (req, res) => {
       return res.status(401).json({ msg: 'Unauthorized' });
     }
     let roles = req.body.roles;
+    console.log(roles);
     for (let player of room.players) {
       if (roles[player.id]) {
         player.role = roles[player.id];
