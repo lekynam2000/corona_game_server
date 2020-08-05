@@ -460,6 +460,6 @@ export const Game = ({ match, setAlert }) => {
       </div>
     </div>
   );
-  return <div>Game</div>;
+  return logged ? loggedLayout : notLoggedLayout;
 };
 export default connect(null, { setAlert })(withRouter(Game));
