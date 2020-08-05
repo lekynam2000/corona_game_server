@@ -71,26 +71,20 @@ router.delete('/room/:id/:p_id', auth, async (req, res) => {
     if (room.admin.toString() != req.user.id) {
       return res.status(401).json({ msg: 'Unauthorized' });
     }
-    for (let player of room.players) {
-      if (player.connected) {
-        return res
-          .status(400)
-          .json({ msg: 'Cannot delete room with players connected' });
-      }
-    }
+
     let delete_id = -1;
-    for (let id in room.players) {
-      if (room.players[id].id == req.params.p_id) {
-        delete_id = id;
+    for (let i in room.players) {
+      if (room.players[i].id == req.params.p_id) {
+        delete_id = i;
         break;
       }
     }
-    if (delete_id < 0) {
+    if (delete_id < 0 || room.players[delete_id].playing) {
       return res.status(400).json({ msg: 'Bad request' });
     }
     room.players.splice(delete_id, 1);
     await room.save();
-    res.json(room);
+    res.json(room.players);
   } catch (err) {
     console.error(err.message);
     return res.status(500).json({ msg: 'Server error' });

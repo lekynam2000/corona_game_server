@@ -99,8 +99,10 @@ export const Game = ({ match, setAlert }) => {
     }
   }
   function reconnect(socket) {
-    if (inputId.current && inputId.current.value) {
+    if (socket && inputId.current && inputId.current.value) {
+      console.log(inputId.current.value);
       socket.emit(ce.reconnect, inputId.current.value);
+      console.log('emitted');
     } else {
       setAlert('Not allowed empty Id', 'danger');
     }

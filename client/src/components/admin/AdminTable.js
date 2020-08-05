@@ -82,6 +82,12 @@ export const AdminTable = ({ match, setAlert }) => {
   function startGame(socket) {
     socket.emit(ce.gameStart, true);
   }
+  function deletePlayer(p_id) {
+    api.delete(`/game/room/${match.params.id}/${p_id}`).then((res) => {
+      console.log(res);
+      setPlayers(res.data);
+    });
+  }
   return (
     <div className='row'>
       <div className='col-9'>
@@ -108,6 +114,16 @@ export const AdminTable = ({ match, setAlert }) => {
                 <td>{p.connected ? 'Connected' : 'Disconnected'}</td>
                 <td>{p.playing ? 'Playing' : 'Not playing'}</td>
                 <td>{p.role}</td>
+                <td>
+                  <button
+                    className='btn btn-small btn-danger'
+                    onClick={() => {
+                      deletePlayer(p._id);
+                    }}
+                  >
+                    X
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>

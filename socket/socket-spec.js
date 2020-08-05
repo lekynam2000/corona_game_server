@@ -31,7 +31,7 @@ const server_emit = {
 const client_emit = {
   addPlayer: 'addPlayer',
   //name
-  reconnect: 'reconnect',
+  reconnect: 'recoGame',
   //r_id,
   gameStart: 'gameStart',
   //

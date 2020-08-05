@@ -9,19 +9,22 @@ module.exports = async function (socket) {
   const nsp = socket.nsp;
   const roomId = nsp.name.split('_')[1];
   let inScopeId = 0;
+  socket.on(ce.reconnect, (r_id) => {
+    console.log(r_id);
+    reconnect(socket, r_id, roomId, nsp).then((data) => {
+      inScopeId = data;
+    });
+  });
   socket.on(ce.addPlayer, (name) => {
     addPlayer(socket, name, roomId, nsp).then((data) => {
       inScopeId = data;
     });
   });
+
   socket.on(ce.gameStart, () => {
     gameStart(socket, roomId, nsp);
   });
-  socket.on(ce.reconnect, (r_id) => {
-    reconnect(socket, r_id, roomId, nsp).then((data) => {
-      inScopeId = data;
-    });
-  });
+
   socket.on(ce.getInfo, (r_id) => {
     getInfo(socket, roomId, r_id);
   });
@@ -100,11 +103,13 @@ async function reconnect(socket, r_id, roomId, nsp) {
     if (r_index < 0) {
       return socket.emit(se.errorGame, { msg: 'Invalid id' });
     }
-    room.players.connected = true;
+    room.players[r_index].connected = true;
     await room.save();
+    socket.emit(se.getId, { id: r_id });
     nsp.emit(se.updatePlayers, {
       players: room.players,
     });
+
     if (room.playing) {
       extractBasicInfo(socket, game);
     }
