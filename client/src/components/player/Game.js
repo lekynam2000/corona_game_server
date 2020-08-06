@@ -373,7 +373,7 @@ export const Game = ({ match, setAlert }) => {
         </ol>
       </div>
       <div className='col-lg-7'>
-        <div className='card'>
+        <div className='card basicInfo'>
           <div className='card-body'>
             <div className='row'>
               <div className='col-lg-2'>Turn: {turn}</div>

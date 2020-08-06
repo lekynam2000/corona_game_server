@@ -52,3 +52,13 @@ ul.selectedPlayers li {
   border-radius: 4px;
   border: 2px solid black;
 }
+.personalInfo .btn {
+  margin: 5px;
+  padding: 2px;
+}
+.container {
+  margin-top: 20px;
+}
+.basicInfo {
+  text-align: center;
+}
