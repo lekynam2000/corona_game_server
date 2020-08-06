@@ -282,8 +282,8 @@ export const Game = ({ match, setAlert }) => {
     if (p.name.length > 1) {
       shortName += p.name[1];
     }
-    let top = 20 + Math.random() * 60;
-    let left = 20 + Math.random() * 60;
+    let top = 10 + Math.random() * 70;
+    let left = 10 + Math.random() * 70;
     return (
       <div
         className={'playerIcon' + p.quarantined ? ' quarantined' : ''}
@@ -293,11 +293,12 @@ export const Game = ({ match, setAlert }) => {
           backgroundColor: getRandomColor(),
           position: 'absolute',
           border: '1px solid black',
-          opacity: '90%',
+          opacity: '0.9',
           borderRadius: '50%',
           width: '35px',
           height: '35px',
           textAlign: 'center',
+          lineHeight: '35px',
           fontWeight: 'bold',
         }}
       >
@@ -366,9 +367,7 @@ export const Game = ({ match, setAlert }) => {
           {players.map((p) => (
             <li className='list-group-item'>
               {p.name}: {p.place > -1 ? placeName[p.place] : 'None'}{' '}
-              <span className='text-danger'>{` (${
-                p.quarantined ? 'Q' : ''
-              })`}</span>
+              <span className='text-danger'>{p.quarantined ? '(Q)' : ''}</span>
             </li>
           ))}
         </ol>

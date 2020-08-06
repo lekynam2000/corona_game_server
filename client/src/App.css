@@ -23,24 +23,24 @@
   height: 100%;
 }
 .card.places {
-  opacity: 80%;
+  opacity: 0.8;
 }
 .card.places:hover {
   cursor: not-allowed;
 }
 .card.places.active {
-  opacity: 100%;
+  opacity: 1;
 }
 .card.places.active:hover {
   cursor: pointer;
-  opacity: 90%;
+  opacity: 0.9;
   -webkit-box-shadow: 2px -2px 15px 3px rgba(17, 150, 100, 1);
   -moz-box-shadow: 2px -2px 15px 3px rgba(17, 150, 100, 1);
   box-shadow: 2px -2px 15px 3px rgba(17, 150, 100, 1);
 }
 .card.sameRoomPlayers li:hover {
   cursor: pointer;
-  opacity: 80%;
+  opacity: 0.8;
   background-color: #bbbbbb;
 }
 ul.selectedPlayers {

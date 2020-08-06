@@ -317,6 +317,7 @@ async function move(socket, roomId, nsp, arr_id, target) {
     }
     game.players[arr_id].place = target;
     game.moved_num++;
+    game.players[arr_id].moved;
     if (game.moved_num == game.players.length - 1) {
       let doctor = game.players.filter((p) => p.role == roles.doctor)[0];
       let flag = true;
@@ -407,7 +408,7 @@ async function doctor_cure(socket, roomId, id, nsp, target_id) {
       if (!target) {
         return socket.emit(se.errorGame, { msg: 'Not valid target' });
       }
-      if (target.place == 6 && target.infected) {
+      if (target.place == 6) {
         if (
           target.role != roles.super_infected &&
           target.role != roles.super_infected_hidden
