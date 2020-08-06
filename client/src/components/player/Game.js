@@ -335,7 +335,7 @@ export const Game = ({ match, setAlert }) => {
         <li className='list-group-item'>
           <div>Or enter code to reconnect</div>
           <label htmlFor='id'>
-            Name:
+            Secret code( received from GM):
             <div className='input-group mb-3'>
               <input
                 type='text'
