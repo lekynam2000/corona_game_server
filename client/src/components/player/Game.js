@@ -73,6 +73,8 @@ export const Game = ({ match, setAlert }) => {
       if (msg == phases.doctor_scan) {
         doctor_scan(socket);
       }
+      let r_id = sessionStorage.getItem('r_id');
+      socket.emit(ce.getInfo, r_id);
       setList([]);
     });
     socket.on(se.updateInfected, (msg) => {
@@ -494,24 +496,27 @@ export const Game = ({ match, setAlert }) => {
         <div className='card sameRoomPlayers'>
           <div className='card-body'>
             <ul className='list-group'>
-              {players
-                .filter((p) => {
-                  return myInfo.role == roles.police || myInfo.place == p.place;
-                })
-                .map((player) => {
-                  let p = player;
-                  console.log(p);
-                  return (
-                    <li
-                      className='list-group-item sameRoom'
-                      onClick={() => {
-                        addToList(p.arr_id);
-                      }}
-                    >
-                      {p.name}
-                    </li>
-                  );
-                })}
+              {players &&
+                players
+                  .filter((p) => {
+                    return (
+                      myInfo.role == roles.police || myInfo.place == p.place
+                    );
+                  })
+                  .map((player) => {
+                    let p = player;
+                    console.log(p);
+                    return (
+                      <li
+                        className='list-group-item sameRoom'
+                        onClick={() => {
+                          addToList(p.arr_id);
+                        }}
+                      >
+                        {p.name}
+                      </li>
+                    );
+                  })}
             </ul>
             {scanResult.length > 0 && (
               <ul className='list-group'>
