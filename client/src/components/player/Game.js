@@ -41,6 +41,7 @@ export const Game = ({ match, setAlert }) => {
   const [max_select, setMaxSelect] = useState(0);
   const [players, setPlayers] = useState([]);
   const [scanResult, setScanResult] = useState([]);
+  const [endGameMsg, setEngGameMsg] = useState(null);
   const inputName = useRef(null);
   const inputId = useRef(null);
   useEffect(() => {
@@ -48,6 +49,9 @@ export const Game = ({ match, setAlert }) => {
     setSocket(socket);
     socket.on(se.errorGame, (e) => {
       setAlert(e.msg, 'danger');
+    });
+    socket.on(se.endGame, ({ msg }) => {
+      setEngGameMsg(msg);
     });
     socket.on(se.getId, (msg) => {
       sessionStorage.setItem('r_id', msg.id);
@@ -380,6 +384,7 @@ export const Game = ({ match, setAlert }) => {
           </div>
         </div>
         <div className='card'>
+          {endGameMsg && <div className='card-header'>{endGameMsg}</div>}
           <div className='card-body'>
             <div className='row'>
               {Object.keys(placeName).map((i) => {
@@ -480,17 +485,6 @@ export const Game = ({ match, setAlert }) => {
                   </div>
                 </div>
               )}
-            <div className='row'>
-              <button
-                onClick={() => {
-                  if (mySocket && myInfo && phase == phases.random_infect) {
-                    mySocket.emit('random_infect', true);
-                  }
-                }}
-              >
-                Random Infect
-              </button>
-            </div>
           </div>
         </div>
         <div className='card sameRoomPlayers'>
