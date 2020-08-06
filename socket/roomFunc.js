@@ -37,7 +37,7 @@ module.exports = async function (socket) {
     doctor_scan(socket, roomId, id, nsp);
   });
   socket.on(ce.doctor_cure, (msg) => {
-    doctor_cure(socket, roomId, id, nsp, target_id);
+    doctor_cure(socket, roomId, msg.id, nsp, msg.target_id);
   });
   socket.on(ce.distribute_mask, (msg) => {
     distribute_mask(socket, roomId, msg.id, nsp, msg.target_id);
