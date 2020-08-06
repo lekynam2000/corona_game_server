@@ -191,7 +191,7 @@ export const Game = ({ match, setAlert }) => {
                 target_action(mySocket, ce.distribute_mask, selected_list);
               }}
             >
-              Give Mask
+              Mask
             </button>
           );
         } else {
@@ -270,10 +270,10 @@ export const Game = ({ match, setAlert }) => {
     }
   }
   function getRandomColor() {
-    var letters = '23456789ABCD';
+    var letters = '456789AB';
     var color = '#';
     for (var i = 0; i < 6; i++) {
-      color += letters[Math.floor(Math.random() * 12)];
+      color += letters[Math.floor(Math.random() * 8)];
     }
     return color;
   }
@@ -295,9 +295,10 @@ export const Game = ({ match, setAlert }) => {
           border: '1px solid black',
           opacity: '90%',
           borderRadius: '50%',
-          width: '25px',
-          height: '25px',
+          width: '35px',
+          height: '35px',
           textAlign: 'center',
+          fontWeight: 'bold',
         }}
       >
         {shortName}
@@ -364,7 +365,10 @@ export const Game = ({ match, setAlert }) => {
         <ol className='list-group'>
           {players.map((p) => (
             <li className='list-group-item'>
-              {p.name}: {p.place > -1 ? placeName[p.place] : 'None'}
+              {p.name}: {p.place > -1 ? placeName[p.place] : 'None'}{' '}
+              <span className='text-danger'>{` (${
+                p.quarantined ? 'Q' : ''
+              })`}</span>
             </li>
           ))}
         </ol>
@@ -464,18 +468,13 @@ export const Game = ({ match, setAlert }) => {
         <div className='card personalInfo'>
           <div className='card-body'>
             <div className='row'>
-              <div className='col-lg-12'>Name: {myInfo.name}</div>
-            </div>
-            <div className='row'>
-              <div className='col-lg-12'>Role: {myInfo.role} </div>
-            </div>
-            <div className='row'>
-              <div className='col-lg-6'>
-                Infected: {myInfo.infected ? 'Yes' : 'No'}
+              <div className='col-lg-12'>
+                <b>Name:</b> {myInfo.name}
               </div>
-              <div className='col-lg-6'>
-                {' '}
-                Moved: {myInfo.moved ? 'Yes' : 'No'}
+            </div>
+            <div className='row'>
+              <div className='col-lg-12'>
+                <b>Role:</b> {myInfo.role}{' '}
               </div>
             </div>
             <div className='row'>
@@ -484,24 +483,36 @@ export const Game = ({ match, setAlert }) => {
               </div>
             </div>
             <div className='row'>
-              <div className='col-lg-12'>
-                Quarantined: {myInfo.quarantined ? 'Yes' : 'No'}
-              </div>
-            </div>
-            {myInfo &&
-              (myInfo.role == roles.super_infected_hidden ||
-                myInfo.role == roles.super_infected) && (
-                <div className='row'>
-                  <div className='col-lg-12'>
-                    Execute Infect: {myInfo.had_infect ? 'Yes' : 'No'}
+              {myInfo.infected && (
+                <div className='col-lg-4'>
+                  <div className='btn btn-danger btn-small'>infected</div>
+                </div>
+              )}
+
+              {myInfo.moved && (
+                <div className='col-lg-4'>
+                  <div className='btn btn-success btn-small'>moved</div>
+                </div>
+              )}
+              {myInfo.quarantined && (
+                <div className='col-lg-4'>
+                  <div className='btn btn-secondary btn-small'>quarantined</div>
+                </div>
+              )}
+              {myInfo.had_infect && (
+                <div className='col-lg-8'>
+                  <div className='btn btn-warning btn-small'>
+                    infection executed
                   </div>
                 </div>
               )}
+            </div>
           </div>
         </div>
         <div className='card sameRoomPlayers'>
           <div className='card-body'>
             <ul className='list-group'>
+              <li className='list-group-item'>Players in same place:</li>
               {players &&
                 players
                   .filter((p) => {
@@ -525,8 +536,8 @@ export const Game = ({ match, setAlert }) => {
                   })}
             </ul>
             {scanResult.length > 0 && (
-              <ul className='list-group'>
-                <li className='list-group-item'>Infected: </li>
+              <ul className='list-group mt-1'>
+                <li className='list-group-item'>Infected Players: </li>
                 {scanResult.map((arr_id) => (
                   <li className='list-group-item'>{players[arr_id].name}</li>
                 ))}
@@ -535,19 +546,20 @@ export const Game = ({ match, setAlert }) => {
             <div className='row'>
               <div className='col-lg-9'>
                 <ul className='selectedPlayers'>
-                  {selected_list.map(({ arr_id, name }) => (
-                    <li>
-                      {name}
-                      <button
-                        className='btn btn-danger'
-                        onClick={() => {
-                          deleteFromList(arr_id);
-                        }}
-                      >
-                        x
-                      </button>
-                    </li>
-                  ))}
+                  {target_button(mySocket, phase, myInfo) != '' &&
+                    selected_list.map(({ arr_id, name }) => (
+                      <li>
+                        {name}
+                        <button
+                          className='btn btn-danger btn-small'
+                          onClick={() => {
+                            deleteFromList(arr_id);
+                          }}
+                        >
+                          x
+                        </button>
+                      </li>
+                    ))}
                 </ul>
               </div>
               <div className='col-lg-3'>
