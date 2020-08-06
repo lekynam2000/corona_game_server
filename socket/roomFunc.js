@@ -358,6 +358,7 @@ async function move(socket, roomId, nsp, arr_id, target) {
 }
 async function doctor_scan(socket, roomId, id, nsp) {
   try {
+    console.log('doctor', id);
     const room = await Room.findById(roomId);
     const game = await Game.findById(room.game);
     if (game.phase != phases.doctor_scan) {

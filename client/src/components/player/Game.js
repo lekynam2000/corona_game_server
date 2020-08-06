@@ -132,7 +132,7 @@ export const Game = ({ match, setAlert }) => {
   function doctor_scan(socket) {
     if (myInfo && myInfo.role == roles.doctor) {
       let id = myInfo._id;
-      socket.emit(ce.doctor_scan, { id });
+      socket.emit(ce.doctor_scan, id);
     }
   }
   function target_action(socket, action, List) {
