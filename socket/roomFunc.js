@@ -317,7 +317,7 @@ async function move(socket, roomId, nsp, arr_id, target) {
     }
     game.players[arr_id].place = target;
     game.moved_num++;
-    game.players[arr_id].moved;
+    game.players[arr_id].moved = true;
     if (game.moved_num == game.players.length - 1) {
       let doctor = game.players.filter((p) => p.role == roles.doctor)[0];
       let flag = true;
