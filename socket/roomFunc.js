@@ -28,7 +28,7 @@ module.exports = async function (socket) {
     getInfo(socket, roomId, r_id);
   });
   socket.on(ce.quarantine, (msg) => {
-    quarantine(socket, msg.id, rooId, nsp, msg.pList);
+    quarantine(socket, msg.id, roomId, nsp, msg.pList);
   });
   socket.on(ce.move, (msg) => {
     move(socket, roomId, nsp, msg.arr_id, msg.target);
@@ -173,7 +173,7 @@ async function gameStart(socket, roomId, nsp) {
     newGame['admin'] = room.admin;
     newGame['quara_num'] = quara_num;
     newGame['target_point'] = room.target_point;
-    newGame['infected_num'] = calcInfection(newGame.players);
+    newGame['infected_players'] = calcInfection(newGame.players);
     const game = new Game(newGame);
     room.playing = true;
     await game.save();
@@ -192,7 +192,7 @@ async function extractBasicInfo(nsp, game) {
   let quara_num = game.quara_num;
   let point = game.point;
   let phase = game.phase;
-  let infect_num = game.infected_num;
+  let infect_players = game.infected_players;
   let turn = game.turn;
   let big3 = {
     [roles.doctor]: -1,
@@ -215,7 +215,7 @@ async function extractBasicInfo(nsp, game) {
   nsp.emit(se.basicSetup, { map, target_point, quara_num, big3 });
   nsp.emit(se.updatePoint, point);
   nsp.emit(se.changePhase, phase);
-  nsp.emit(se.updateInfected, infect_num);
+  nsp.emit(se.updateInfected, infect_players);
   nsp.emit(se.updateTurn, turn);
   nsp.emit(se.updateMove, { players });
 }
@@ -252,7 +252,7 @@ async function quarantine(socket, id, roomId, nsp, pList) {
     if (game.turn > 0) {
       for (let id of pList) {
         if (
-          game.players[id].role == role.doctors ||
+          game.players[id].role == roles.doctors ||
           game.players[id].role == roles.mask_distributor ||
           game.players[id].role == roles.police
         ) {
@@ -303,7 +303,8 @@ async function move(socket, roomId, nsp, arr_id, target) {
     const curr = game.players[arr_id].place;
     if (
       game.players[arr_id].moved ||
-      game.players[arr_id].role == roles.police
+      game.players[arr_id].role == roles.police ||
+      game.players[arr_id].quarantined
     ) {
       return socket.emit(se.errorGame, {
         msg: 'Unable to move',
@@ -321,8 +322,8 @@ async function move(socket, roomId, nsp, arr_id, target) {
       let flag = true;
       for (let p of game.players) {
         if (
-          p.roles == roles.super_infected ||
-          p.roles == roles.super_infected_hidden
+          p.role == roles.super_infected ||
+          p.role == roles.super_infected_hidden
         ) {
           if (p.place != doctor.place) {
             flag = false;
@@ -538,9 +539,11 @@ async function random_infect(roomId, nsp) {
       let percent = 0.4 + 0.1 * place[currentPlace].length;
       if (val < percent) {
         // infection happen
-        let infected_id = place[getRandomInt(place[currentPlace].length)];
+        let infected_id =
+          place[currentPlace][getRandomInt(place[currentPlace].length)];
         if (infected_id == infector_id) {
-          infected_id = place[getRandomInt(place[currentPlace].length)];
+          infected_id =
+            place[currentPlace][getRandomInt(place[currentPlace].length)];
         }
         if (game.players[infected_id].role == roles.normal) {
           game.players[infector_id].infected = true;
@@ -562,10 +565,11 @@ async function endPhase(roomId, nsp) {
     if (game.phase != phases.endPhase) {
       return nsp.emit(se.errorGame, { msg: 'Random infect in wrong phase' });
     }
-    let infect_num = calcInfection(game.players);
-    game.infected_num = infect_num;
-    game.point += infect_num;
+    let infected_players = calcInfection(game.players);
+    game.infected_players = infected_players;
+    game.point += infected_players;
     game.moved_num = 0;
+    game.infected_num = 0;
     game.turn++;
     game.phase = phases.quarantine;
     for (let player of game.players) {
@@ -588,7 +592,7 @@ async function endPhase(roomId, nsp) {
       })),
     });
     nsp.emit(se.changePhase, game.phase);
-    nsp.emit(se.updateInfected, infect_num);
+    nsp.emit(se.updateInfected, game.infected_players);
     nsp.emit(se.updatePoint, game.point);
     if (game.point >= game.target_point) {
       endGame(roomId, nsp, false);

@@ -17,6 +17,10 @@ const GameSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  infected_players: {
+    type: Number,
+    default: 0,
+  },
   quara_num: {
     type: Number,
     required: true,
