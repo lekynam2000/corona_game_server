@@ -54,6 +54,7 @@ export const Game = ({ match, setAlert }) => {
       setLogged(true);
     });
     socket.on(se.myInfo, (player) => {
+      console.log(player);
       setMyInfo(player);
       if (player.role != roles.normal && player.role != roles.police) {
         setMaxSelect(1);
@@ -64,6 +65,8 @@ export const Game = ({ match, setAlert }) => {
       setTargetPoint(msg.target_point);
       setQuaraNum(msg.quara_num);
       setBig3(msg.big3);
+      let r_id = sessionStorage.getItem('r_id');
+      socket.emit(ce.getInfo, r_id);
     });
     socket.on(se.changePhase, (msg) => {
       setPhase(msg);
@@ -88,7 +91,7 @@ export const Game = ({ match, setAlert }) => {
       setMyInfo((myInfo) => {
         let info = { ...myInfo };
         info[key] = val;
-        return myInfo;
+        return info;
       });
     });
     return () => {
@@ -116,8 +119,8 @@ export const Game = ({ match, setAlert }) => {
       setAlert('Not allowed empty Id', 'danger');
     }
   }
-  function move(socket, target) {
-    let arr_id = myInfo.arr_id;
+  function move(socket, target, info) {
+    let arr_id = info.arr_id;
     socket.emit(ce.move, { arr_id, target });
   }
   function doctor_scan(socket) {
@@ -249,7 +252,18 @@ export const Game = ({ match, setAlert }) => {
     return (
       <div
         className={'playerIcon' + p.quarantined ? ' quarantined' : ''}
-        style={`top: ${top}%;left:${left}%;background-color:${getRandomColor()}`}
+        style={{
+          top: top + '%',
+          left: left + '%',
+          backgroundColor: getRandomColor(),
+          position: 'absolute',
+          border: '1px solid black',
+          opacity: '90%',
+          borderRadius: '50%',
+          width: '25px',
+          height: '25px',
+          textAlign: 'center',
+        }}
       >
         {shortName}
       </div>
@@ -360,7 +374,7 @@ export const Game = ({ match, setAlert }) => {
                   <div
                     className='col-lg-4'
                     onClick={() => {
-                      move(mySocket, i);
+                      move(mySocket, i, myInfo);
                     }}
                   >
                     <div className={'card places' + (active ? ' active' : '')}>
@@ -413,11 +427,28 @@ export const Game = ({ match, setAlert }) => {
       <div className='col-lg-3'>
         <div className='card personalInfo'>
           <div className='card-body'>
-            Name: {myInfo.name} Role: {myInfo.role} Infected:{' '}
-            {myInfo.infected ? 'Yes' : 'No'}
-            Mask: {myInfo.has_mask ? 'Yes' : 'No'}
-            {myInfo.place > -1 && `Place: ${placeName[myInfo.place]}`}
-            Moved: {myInfo.moved ? 'Yes' : 'No'}
+            <div className='row'>
+              <div className='col-lg-6'>Name: {myInfo.name}</div>
+              <div className='col-lg-6'>Role: {myInfo.role} </div>
+            </div>
+            <div className='row'>
+              <div className='col-lg-6'>
+                Infected: {myInfo.infected ? 'Yes' : 'No'}
+              </div>
+              <div className='col-lg-6'>
+                {' '}
+                Mask: {myInfo.has_mask ? 'Yes' : 'No'}
+              </div>
+            </div>
+            <div className='row'>
+              <div className='col-lg-6'>
+                {myInfo.place > -1 && `Place: ${placeName[myInfo.place]}`}
+              </div>
+              <div className='col-lg-6'>
+                {' '}
+                Moved: {myInfo.moved ? 'Yes' : 'No'}
+              </div>
+            </div>
           </div>
         </div>
         <div className='card sameRoomPlayers'>

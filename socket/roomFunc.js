@@ -10,7 +10,6 @@ module.exports = async function (socket) {
   const roomId = nsp.name.split('_')[1];
   let inScopeId = 0;
   socket.on(ce.reconnect, (r_id) => {
-    console.log(r_id);
     reconnect(socket, r_id, roomId, nsp).then((data) => {
       inScopeId = data;
     });
@@ -174,9 +173,9 @@ async function gameStart(socket, roomId, nsp) {
     const game = new Game(newGame);
     room.playing = true;
     await game.save();
+    room.game = game.id;
     await room.save();
-    console.log(game);
-    // nsp.emit(se.startGame, room.playing);
+    nsp.emit(se.startGame, room.playing);
     socket.emit(se.updatePlayers, { players: room.players });
     extractBasicInfo(nsp, game);
   } catch (error) {
@@ -218,7 +217,7 @@ async function extractBasicInfo(nsp, game) {
 async function getInfo(socket, roomId, r_id) {
   try {
     const room = await Room.findById(roomId);
-    if (!room.playing || room.game) {
+    if (!room.playing || !room.game) {
       return socket.emit(se.errorGame, { msg: 'Not playing room' });
     }
     const game = await Game.findById(room.game);
@@ -295,7 +294,8 @@ async function move(socket, roomId, nsp, arr_id, target) {
       return nsp.emit(se.errorGame, { msg: 'Move in wrong phase' });
     }
     // const player = game.players[arr_id];
-    const curr = player.place;
+    console.log(arr_id, target);
+    const curr = game.players[arr_id].place;
     if (
       game.players[arr_id].moved ||
       game.players[arr_id].role == roles.police
@@ -344,6 +344,7 @@ async function move(socket, roomId, nsp, arr_id, target) {
     if (game.phase != phases.moved) {
       nsp.emit(se.changePhase, game.phase);
     }
+    console.log('gonna update moved');
     socket.emit(se.detailChange, { key: 'moved', val: true });
   } catch (error) {
     handleError(error, socket);
