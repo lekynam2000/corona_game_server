@@ -35,6 +35,9 @@ export const AdminTable = ({ match, setAlert }) => {
       socket.on(se.startGame, () => {
         setPlaying(true);
       });
+      socket.on(se.errorGame, (err) => {
+        setAlert(err.msg, 'danger');
+      });
     });
     return () => {
       if (socket) {

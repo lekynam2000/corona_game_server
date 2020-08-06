@@ -129,7 +129,8 @@ export const Game = ({ match, setAlert }) => {
       socket.emit(ce.doctor_scan, { id });
     }
   }
-  function target_action(socket, action, pList) {
+  function target_action(socket, action, List) {
+    let pList = List.map((p) => p.arr_id);
     if (myInfo) {
       if (pList.length < max_select) {
         setAlert(`Must select ${max_select} players`, 'danger');
@@ -138,7 +139,7 @@ export const Game = ({ match, setAlert }) => {
       if (myInfo.role == roles.police) {
         socket.emit(action, { id, pList });
       } else {
-        socket.emit(action, { target_id: pList[0] });
+        socket.emit(action, { id, target_id: pList[0] });
       }
     }
   }
@@ -146,6 +147,7 @@ export const Game = ({ match, setAlert }) => {
     if (!info) {
       return '';
     }
+    console.log('role', info.role);
     switch (info.role) {
       case roles.doctor:
         if (phase == phases.doctor_cure && info.place == 6) {
@@ -159,6 +161,20 @@ export const Game = ({ match, setAlert }) => {
                 Cure
               </button>
             )
+          );
+        } else {
+          return '';
+        }
+      case roles.mask_distributor:
+        if (phase == phases.distribute_mask) {
+          return (
+            <button
+              onClick={() => {
+                target_action(mySocket, ce.distribute_mask, selected_list);
+              }}
+            >
+              Give Mask
+            </button>
           );
         } else {
           return '';
@@ -213,6 +229,7 @@ export const Game = ({ match, setAlert }) => {
         setAlert('Cannot select a target twice', 'danger');
         return;
       }
+      console.log(arr_id, players);
       setList((list) => [...list, { arr_id, name: players[arr_id].name }]);
     } else {
       setAlert(`Cannot select more than ${max_select} players`, 'danger');
@@ -428,8 +445,10 @@ export const Game = ({ match, setAlert }) => {
         <div className='card personalInfo'>
           <div className='card-body'>
             <div className='row'>
-              <div className='col-lg-6'>Name: {myInfo.name}</div>
-              <div className='col-lg-6'>Role: {myInfo.role} </div>
+              <div className='col-lg-12'>Name: {myInfo.name}</div>
+            </div>
+            <div className='row'>
+              <div className='col-lg-12'>Role: {myInfo.role} </div>
             </div>
             <div className='row'>
               <div className='col-lg-6'>
@@ -437,17 +456,38 @@ export const Game = ({ match, setAlert }) => {
               </div>
               <div className='col-lg-6'>
                 {' '}
-                Mask: {myInfo.has_mask ? 'Yes' : 'No'}
+                Moved: {myInfo.moved ? 'Yes' : 'No'}
               </div>
             </div>
             <div className='row'>
-              <div className='col-lg-6'>
+              <div className='col-lg-12'>
                 {myInfo.place > -1 && `Place: ${placeName[myInfo.place]}`}
               </div>
-              <div className='col-lg-6'>
-                {' '}
-                Moved: {myInfo.moved ? 'Yes' : 'No'}
+            </div>
+            <div className='row'>
+              <div className='col-lg-12'>
+                Quarantined: {myInfo.quarantined ? 'Yes' : 'No'}
               </div>
+            </div>
+            {myInfo &&
+              (myInfo.role == roles.super_infected_hidden ||
+                myInfo.role == roles.super_infected) && (
+                <div className='row'>
+                  <div className='col-lg-12'>
+                    Execute Infect: {myInfo.had_infect ? 'Yes' : 'No'}
+                  </div>
+                </div>
+              )}
+            <div className='row'>
+              <button
+                onClick={() => {
+                  if (mySocket && myInfo && phase == phases.random_infect) {
+                    mySocket.emit('random_infect', true);
+                  }
+                }}
+              >
+                Random Infect
+              </button>
             </div>
           </div>
         </div>
@@ -458,7 +498,9 @@ export const Game = ({ match, setAlert }) => {
                 .filter((p) => {
                   return myInfo.role == roles.police || myInfo.place == p.place;
                 })
-                .map((p) => {
+                .map((player) => {
+                  let p = player;
+                  console.log(p);
                   return (
                     <li
                       className='list-group-item sameRoom'
