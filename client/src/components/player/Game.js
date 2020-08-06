@@ -57,6 +57,9 @@ export const Game = ({ match, setAlert }) => {
       sessionStorage.setItem('r_id', msg.id);
       setLogged(true);
     });
+    socket.on(se.updatePoint, (p) => {
+      setPoint(p);
+    });
     socket.on(se.myInfo, (player) => {
       console.log(player);
       setMyInfo(player);
@@ -74,9 +77,6 @@ export const Game = ({ match, setAlert }) => {
     });
     socket.on(se.changePhase, (msg) => {
       setPhase(msg);
-      if (msg == phases.doctor_scan) {
-        doctor_scan(socket);
-      }
       let r_id = sessionStorage.getItem('r_id');
       socket.emit(ce.getInfo, r_id);
       setList([]);
@@ -165,6 +165,18 @@ export const Game = ({ match, setAlert }) => {
                 }}
               >
                 Cure
+              </button>
+            )
+          );
+        } else if (phase == phases.doctor_scan) {
+          return (
+            mySocket && (
+              <button
+                onClick={() => {
+                  doctor_scan(mySocket);
+                }}
+              >
+                Scan
               </button>
             )
           );
