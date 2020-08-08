@@ -29,6 +29,7 @@ export const AdminTable = ({ match, setAlert }) => {
     [roles.super_infected_hidden]: true,
   });
   const [mySocket, setSocket] = useState(null);
+  const [endGameMsg, setEngGameMsg] = useState(null);
 
   useEffect(() => {
     let socket;
@@ -44,6 +45,9 @@ export const AdminTable = ({ match, setAlert }) => {
       });
       socket.on(se.startGame, () => {
         setPlaying(true);
+      });
+      socket.on(se.endGame, ({ msg }) => {
+        setEngGameMsg(msg);
       });
       socket.on(se.errorGame, (err) => {
         setAlert(err.msg, 'danger');
@@ -134,7 +138,10 @@ export const AdminTable = ({ match, setAlert }) => {
   }
   const gameTableTpl = game && (
     <div className='card mt-2 gameDetail'>
-      <div className='card-header'>Game Detail</div>
+      <div className='card-header'>
+        <h3>Game Detail</h3>
+        {endGameMsg && <p>Result: {endGameMsg}</p>}
+      </div>
       <div className='card-body'>
         <p>
           Point: {game.point}/{game.target_point}
