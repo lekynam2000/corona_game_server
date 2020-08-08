@@ -286,8 +286,11 @@ export const Game = ({ match, setAlert }) => {
     if (p.name.length > 1) {
       shortName += p.name[1];
     }
-    let top = 10 + Math.random() * 70;
-    let left = 10 + Math.random() * 70;
+    if (p.name.length > 2) {
+      shortName += p.name[2];
+    }
+    let top = 20 + Math.random() * 60;
+    let left = 20 + Math.random() * 60;
     return (
       <div
         className={'playerIcon' + p.quarantined ? ' quarantined' : ''}
@@ -297,12 +300,11 @@ export const Game = ({ match, setAlert }) => {
           backgroundColor: getRandomColor(),
           position: 'absolute',
           border: '1px solid black',
-          opacity: '0.9',
           borderRadius: '50%',
-          width: '35px',
-          height: '35px',
+          width: '45px',
+          height: '45px',
           textAlign: 'center',
-          lineHeight: '35px',
+          lineHeight: '45px',
           fontWeight: 'bold',
         }}
       >
