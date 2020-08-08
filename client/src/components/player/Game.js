@@ -545,7 +545,7 @@ export const Game = ({ match, setAlert }) => {
                 </div>
               )}
               {myInfo.had_infect && (
-                <div className='col-lg-8'>
+                <div className='col-lg-12'>
                   <div className='btn btn-warning btn-small'>
                     infection executed
                   </div>
