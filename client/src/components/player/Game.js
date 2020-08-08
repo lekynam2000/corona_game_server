@@ -310,7 +310,7 @@ export const Game = ({ match, setAlert }) => {
     <div className='card'>
       <ul className='list-group list-group-flush'>
         <li className='list-group-item'>
-          <div>Enter name if you are new player</div>
+          <div>Enter your name.</div>
           <label htmlFor='name'>
             Name:
             <div className='input-group mb-3'>
@@ -332,9 +332,17 @@ export const Game = ({ match, setAlert }) => {
               </div>
             </div>
           </label>
+          <p>
+            We suggest this type of naming when playing game:{' '}
+            <b>LWN Lee Wee Nam</b> or <b>LWN Wee Nam</b>(The first 3 letter is
+            abbreviation, the remaining is your detail name)
+          </p>
         </li>
         <li className='list-group-item'>
-          <div>Or enter code to reconnect</div>
+          <div>
+            Or enter code to reconnect. (Do not enter this section if you are
+            not told to do so)
+          </div>
           <label htmlFor='id'>
             Secret code( received from GM):
             <div className='input-group mb-3'>
