@@ -530,6 +530,9 @@ export const Game = ({ match, setAlert }) => {
                   .map((player) => {
                     let p = player;
                     console.log(p);
+                    if (big3 && p.arr_id == big3[roles.police]) {
+                      return '';
+                    }
                     return (
                       <li
                         className='list-group-item sameRoom'
@@ -548,7 +551,7 @@ export const Game = ({ match, setAlert }) => {
               </p>
             )}
             <div className='row'>
-              <div className='col-lg-9'>
+              <div className='col-lg-8'>
                 <ul className='selectedPlayers'>
                   {target_button(mySocket, phase, myInfo) != '' &&
                     selected_list.map(({ arr_id, name }) => (
