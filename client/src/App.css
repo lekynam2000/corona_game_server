@@ -46,7 +46,7 @@ th {
   box-shadow: 2px -2px 15px 3px rgba(17, 150, 100, 1);
 }
 .card.sameRoomPlayers {
-  background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+  background: linear-gradient(0deg, #fdbb2d 0%, #22c1c3 100%);
   /* background-size: 400% 400%; */
 }
 .card.sameRoomPlayers li {
