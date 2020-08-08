@@ -15,6 +15,7 @@ import YuuGar from '../../img/yg.jpg';
 import Hall6 from '../../img/hall6.jpg';
 import Fullerton from '../../img/fullerton.png';
 import Quara from '../../img/quara.jpg';
+import NTUmap from '../../img/NTUmap.jpg';
 export const Game = ({ match, setAlert }) => {
   const placeName = [
     'Canteen 2',
@@ -25,6 +26,7 @@ export const Game = ({ match, setAlert }) => {
     'Hall 6',
     'Fullerton',
   ];
+  const prettyOrder = [1, 0, 5, 2, 6, -1, 3, -2, 4];
   const placeImg = [Can2, theArc, nyAudi, theHive, YuuGar, Hall6, Fullerton];
   const [logged, setLogged] = useState(false);
   const [mySocket, setSocket] = useState(null);
@@ -448,63 +450,72 @@ export const Game = ({ match, setAlert }) => {
           {endGameMsg && <div className='card-header'>{endGameMsg}</div>}
           <div className='card-body'>
             <div className='row'>
-              {Object.keys(placeName).map((i) => {
-                let active =
-                  phase == phases.move &&
-                  map &&
-                  myInfo &&
-                  !myInfo.moved &&
-                  (myInfo.place == -1 || map[i][myInfo.place]);
-                return (
-                  <div
-                    className='col-lg-4'
-                    onClick={() => {
-                      move(mySocket, i, myInfo);
-                    }}
-                  >
-                    <div className={'card places' + (active ? ' active' : '')}>
-                      <div className='card-header'>
-                        {players.map((p) => {
-                          if (p.place == i) {
-                            return playerTpl(p);
-                          } else {
-                            return '';
-                          }
-                        })}
-                        <img
-                          src={placeImg[i]}
-                          alt={placeName[i]}
-                          className='card-img-top'
-                        />
-                      </div>
-                      <div className='card-body'>
-                        <p className='card-text'>{placeName[i]}</p>
+              {prettyOrder.map((i) => {
+                if (i > -1) {
+                  let active =
+                    phase == phases.move &&
+                    map &&
+                    myInfo &&
+                    !myInfo.moved &&
+                    (myInfo.place == -1 || map[i][myInfo.place]);
+                  return (
+                    <div
+                      className='col-lg-4'
+                      onClick={() => {
+                        move(mySocket, i, myInfo);
+                      }}
+                    >
+                      <div
+                        className={'card places' + (active ? ' active' : '')}
+                      >
+                        <div className='card-header'>
+                          {players.map((p) => {
+                            if (p.place == i) {
+                              return playerTpl(p);
+                            } else {
+                              return '';
+                            }
+                          })}
+                          <img
+                            src={placeImg[i]}
+                            alt={placeName[i]}
+                            className='card-img-top'
+                          />
+                        </div>
+                        <div className='card-body'>
+                          <p className='card-text'>{placeName[i]}</p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
+                  );
+                } else if (i == -1) {
+                  return (
+                    <div className='col-lg-4 quaraZone'>
+                      <div className={'card places'}>
+                        <div className='card-header'>
+                          {players.map((p) => {
+                            if (p.quarantined) {
+                              return playerTpl(p);
+                            } else {
+                              return '';
+                            }
+                          })}
+                          <img
+                            src={Quara}
+                            alt='Quarantine Zone'
+                            className='card-img-top'
+                          />
+                        </div>
+                        <div className='card-body'>
+                          <p className='card-text'>Quarantine Zone</p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                } else {
+                  return <div className='col-lg-4'></div>;
+                }
               })}
-              <div className='col-lg-4 quaraZone'>
-                <div className={'card places'}>
-                  <div className='card-header'>
-                    {players.map((p) => {
-                      if (p.quarantined) {
-                        return playerTpl(p);
-                      } else {
-                        return '';
-                      }
-                    })}
-                    <img
-                      src={Quara}
-                      alt='Quarantine Zone'
-                      className='card-img-top'
-                    />
-                  </div>
-                  <div className='card-body'>
-                    <p className='card-text'>Quarantine Zone</p>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -554,6 +565,10 @@ export const Game = ({ match, setAlert }) => {
             </div>
           </div>
         </div>
+        <div className='card'>
+          <img src={NTUmap} height='180' alt='map' />
+        </div>
+
         <div className='card sameRoomPlayers'>
           <div className='card-body'>
             <ul className='list-group'>
