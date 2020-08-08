@@ -40,7 +40,7 @@ export const Game = ({ match, setAlert }) => {
   const [selected_list, setList] = useState([]);
   const [max_select, setMaxSelect] = useState(0);
   const [players, setPlayers] = useState([]);
-  const [scanResult, setScanResult] = useState([]);
+  const [scanResult, setScanResult] = useState(-1);
   const [endGameMsg, setEngGameMsg] = useState(null);
   const inputName = useRef(null);
   const inputId = useRef(null);
@@ -542,13 +542,10 @@ export const Game = ({ match, setAlert }) => {
                     );
                   })}
             </ul>
-            {scanResult.length > 0 && (
-              <ul className='list-group mt-1'>
-                <li className='list-group-item'>Infected Players: </li>
-                {scanResult.map((arr_id) => (
-                  <li className='list-group-item'>{players[arr_id].name}</li>
-                ))}
-              </ul>
+            {scanResult > -1 && (
+              <p className='mt-2'>
+                Detected {scanResult} infection in current place
+              </p>
             )}
             <div className='row'>
               <div className='col-lg-9'>

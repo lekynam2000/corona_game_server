@@ -386,7 +386,7 @@ async function doctor_scan(socket, roomId, id, nsp) {
         game.phase = phases.distribute_mask;
       }
       await game.save();
-      socket.emit(se.scanResult, infect_list);
+      socket.emit(se.scanResult, infect_list.length);
       nsp.emit(se.changePhase, game.phase);
     }
   } catch (error) {
