@@ -69,3 +69,13 @@ ul.selectedPlayers li {
 .basicInfo {
   text-align: center;
 }
+.btn.desToggle {
+  transition: ease-in-out 0.5s;
+  transform: rotate(270deg);
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+.btn.desToggle.notShowDes {
+  transform: rotate(90deg);
+}

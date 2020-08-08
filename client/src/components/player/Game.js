@@ -6,6 +6,7 @@ import io from 'socket.io-client';
 import roles from '../../enum/roles';
 import phases from '../../enum/phases';
 import { server_emit as se, client_emit as ce } from '../../enum/socket-spec';
+import mapping from './mapping';
 import Can2 from '../../img/canteen2.jpg';
 import theArc from '../../img/the_arc.jpg';
 import nyAudi from '../../img/ny_audi.jpg';
@@ -32,6 +33,7 @@ export const Game = ({ match, setAlert }) => {
   const [map, setMap] = useState(null);
   const [targetPoint, setTargetPoint] = useState(111);
   const [phase, setPhase] = useState(phases.move);
+  const [showPhaseDes, setShowPhaseDes] = useState(true);
   const [turn, setTurn] = useState(0);
   const [point, setPoint] = useState(0);
   const [quara_num, setQuaraNum] = useState(0);
@@ -306,6 +308,42 @@ export const Game = ({ match, setAlert }) => {
       </div>
     );
   };
+  const phaseCard = phase && (
+    <div className='card phaseCard mt-1 mb-3'>
+      <div className='card-header'>
+        <div className='row'>
+          {Object.keys(mapping).map((ph) => {
+            let p = ph;
+            return (
+              <button
+                className={
+                  'btn mr-1 ' + (p == phase ? 'btn-primary' : 'btn-danger')
+                }
+                disabled={!(p == phase)}
+              >
+                {mapping[p].name}
+              </button>
+            );
+          })}
+          <button
+            className={
+              'btn btn-primary desToggle ' + (showPhaseDes ? '' : 'notShowDes')
+            }
+            onClick={() => {
+              setShowPhaseDes((x) => !x);
+            }}
+          >
+            &gt;
+          </button>
+        </div>
+      </div>
+      {showPhaseDes && (
+        <div className='card-body'>
+          <p>{mapping[phase] && mapping[phase].des}</p>
+        </div>
+      )}
+    </div>
+  );
   const notLoggedLayout = (
     <div className='card'>
       <ul className='list-group list-group-flush'>
@@ -384,9 +422,8 @@ export const Game = ({ match, setAlert }) => {
         <div className='card basicInfo'>
           <div className='card-body'>
             <div className='row'>
-              <div className='col-lg-2'>Turn: {turn}</div>
-              <div className='col-lg-4'>Phase:{phase}</div>
-              <div className='col-lg-2'>Infected: {infected}</div>
+              <div className='col-lg-4'>Turn: {turn}</div>
+              <div className='col-lg-4'>Infected: {infected}</div>
               <div className='col-lg-4'>
                 Point: {point}/{targetPoint}
               </div>
@@ -406,6 +443,7 @@ export const Game = ({ match, setAlert }) => {
             )}
           </div>
         </div>
+        {phaseCard}
         <div className='card'>
           {endGameMsg && <div className='card-header'>{endGameMsg}</div>}
           <div className='card-body'>
