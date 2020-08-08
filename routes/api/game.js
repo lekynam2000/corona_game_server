@@ -4,6 +4,7 @@ const auth = require('../../middleware/auth');
 const { check, validationResult } = require('express-validator');
 const Room = require('../../models/Room');
 const User = require('../../models/User');
+const Game = require('../../models/Game');
 // const Game = require('../../models/Game');
 
 // @route GET api/game/rooms
@@ -33,6 +34,32 @@ router.get('/room/:id', auth, async (req, res) => {
       return res.status(401).json({ msg: 'Not authenticated' });
     }
     res.send(room);
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// @route GET api/game/room/:id/game
+// @desc get current room game
+// @access Private
+router.get('/room/:id/game', auth, async (req, res) => {
+  try {
+    const room = await Room.findById(req.params.id);
+    if (!room) {
+      return res.status(404).json({ msg: 'Not found room' });
+    }
+    if (!room.game) {
+      return res.status(404).json({ msg: 'Not found game' });
+    }
+    if (room.admin.toString() != req.user.id) {
+      return res.status(401).json({ msg: 'Not authenticated' });
+    }
+    const game = await Game.findById(room.game);
+    if (!game) {
+      return res.status(404).json({ msg: 'Cannot extract game detail' });
+    }
+    res.send(game);
   } catch (err) {
     console.error(err.message);
     return res.status(500).json({ msg: 'Server error' });

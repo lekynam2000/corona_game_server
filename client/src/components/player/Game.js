@@ -20,7 +20,7 @@ export const Game = ({ match, setAlert }) => {
     'The Arc',
     'Nanyang Auditorium',
     'The Hive',
-    'Yuunan Garden',
+    'Yunnan Garden',
     'Hall 6',
     'Fullerton',
   ];

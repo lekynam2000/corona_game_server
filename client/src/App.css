@@ -1,11 +1,18 @@
-.playerIcon {
-  display: block;
-  position: absolute;
+table {
+  border-collapse: collapse;
+}
+
+table,
+th,
+td {
   border: 1px solid black;
-  border-radius: 50%;
-  opacity: 80%;
-  width: 30px;
-  height: 30px;
+}
+td,
+th {
+  text-align: center;
+}
+.gameDetail {
+  background-color: #afa;
 }
 .playerIcon.quarantine {
   opacity: 30%;

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Fragment } from 'react';
 import { connect } from 'react-redux';
 import { withRouter, Link } from 'react-router-dom';
 import { setAlert } from '../../actions/alert';
@@ -7,11 +7,21 @@ import roles from '../../enum/roles';
 import { server_emit as se, client_emit as ce } from '../../enum/socket-spec';
 import io from 'socket.io-client';
 export const AdminTable = ({ match, setAlert }) => {
+  const placeName = [
+    'Canteen 2',
+    'The Arc',
+    'Nanyang Auditorium',
+    'The Hive',
+    'Yunnan Garden',
+    'Hall 6',
+    'Fullerton',
+  ];
   const [targetPoint, setPoint] = useState(0);
   const [players, setPlayers] = useState([]);
   const [playing, setPlaying] = useState(false);
   const [customPoint, setCustomPoint] = useState(200);
   const [customRoles, setCustomRoles] = useState({});
+  const [game, setGame] = useState(null);
   const [remainRoles, setRemainRoles] = useState({
     [roles.doctor]: true,
     [roles.police]: true,
@@ -45,6 +55,30 @@ export const AdminTable = ({ match, setAlert }) => {
       }
     };
   }, []);
+  useEffect(() => {
+    var gameItv = null;
+    if (playing) {
+      gameItv = setInterval(() => {
+        fetchGameInfo();
+      }, 1000);
+    }
+    return () => {
+      if (gameItv) {
+        clearInterval(gameItv);
+        gameItv = null;
+      }
+    };
+  }, [playing]);
+  function fetchGameInfo() {
+    api
+      .get(`/game/room/${match.params.id}/game`)
+      .then((res) => {
+        setGame(res.data);
+      })
+      .catch((err) => {
+        setAlert('Error calling API', 'danger');
+      });
+  }
   function changeTargetPoint(point) {
     api
       .put(`/game/room/${match.params.id}/point`, { target_point: point })
@@ -98,144 +132,192 @@ export const AdminTable = ({ match, setAlert }) => {
       setPlayers(res.data);
     });
   }
-  return (
-    <div className='row'>
-      <div className='col-9'>
-        <h2>
-          Room Id:{' '}
-          <Link to={`/game/${match.params.id}`}>{match.params.id}</Link>
-        </h2>
-        <h3>Current Target Point: {targetPoint}</h3>
+  const gameTableTpl = game && (
+    <div className='card mt-2 gameDetail'>
+      <div className='card-header'>Game Detail</div>
+      <div className='card-body'>
+        <p>
+          Point: {game.point}/{game.target_point}
+        </p>
+        <p>Number of infected players: {game.infected_players}</p>
+        <p>Number of Corona virus: {game.quara_num}</p>
+        <p>Turn: {game.turn}</p>
+        <p>Phase: {game.phase}</p>
+        <p>Number of moved players: {game.moved_num}</p>
         <table>
           <thead>
             <tr>
+              <th>Index</th>
               <th>Name</th>
-              <th>Id</th>
-              <th>Connection</th>
-              <th>Playing</th>
               <th>Role</th>
+              <th>Infected</th>
+              <th>Moved</th>
+              <th>Mask</th>
+              <th>Had_Infected </th>
+              <th>Place</th>
+              <th>Quara </th>
             </tr>
           </thead>
           <tbody>
-            {players.map((p) => (
-              <tr key={p._id}>
+            {game.players.map((p) => (
+              <tr>
+                <td>{p.arr_id}</td>
                 <td>{p.name}</td>
-                <td>{p._id}</td>
-                <td>{p.connected ? 'Connected' : 'Disconnected'}</td>
-                <td>{p.playing ? 'Playing' : 'Not playing'}</td>
                 <td>{p.role}</td>
-                <td>
-                  <button
-                    className='btn btn-small btn-danger'
-                    onClick={() => {
-                      deletePlayer(p._id);
-                    }}
-                  >
-                    X
-                  </button>
-                </td>
+                <td>{p.infected ? 'Yes' : 'No'}</td>
+                <td>{p.moved ? 'Yes' : 'No'}</td>
+                <td>{p.has_mask ? 'Yes' : 'No'}</td>
+                <td>{p.had_infect ? 'Yes' : 'No'}</td>
+                <td>{p.place > -1 ? placeName[p.place] : 'None'}</td>
+                <td>{p.quaratined ? 'Yes' : 'No'}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      <div className='col-3'>
-        <div className='target-point'>
-          <label htmlFor='target_point'>
-            Target Point
-            <input
-              type='number'
-              id='target_point'
-              value={customPoint}
-              onChange={(event) => {
-                setCustomPoint(event.target.value);
-              }}
-            />
-          </label>
-          <button
-            className='btn btn-success'
-            onClick={() => {
-              changeTargetPoint(customPoint);
-            }}
-          >
-            Set
-          </button>
-        </div>
-        <div className='roles'>
+    </div>
+  );
+  return (
+    <Fragment>
+      <div className='row'>
+        <div className='col-9'>
+          <h2>
+            Room Id:{' '}
+            <Link to={`/game/${match.params.id}`}>{match.params.id}</Link>
+          </h2>
+          <h3>Current Target Point: {targetPoint}</h3>
           <table>
             <thead>
               <tr>
                 <th>Name</th>
-                <th>Roles</th>
+                <th>Id</th>
+                <th>Connection</th>
+                <th>Playing</th>
+                <th>Role</th>
               </tr>
             </thead>
             <tbody>
-              {players.map((player) => {
-                let p = player;
-                return (
-                  <tr>
-                    <td>{p.name}</td>
-                    <td>
-                      <select
-                        name='roles'
-                        value={customRoles[p._id]}
-                        onChange={(e) => {
-                          console.log(p._id, e.target.value);
-                          onChangeRole(p._id, e.target.value);
-                        }}
-                      >
-                        <option value={null}>None</option>
-
-                        <option value={roles.doctor}>Doctor</option>
-
-                        <option value={roles.police}>Police</option>
-
-                        <option value={roles.mask_distributor}>
-                          Mask Distributor
-                        </option>
-
-                        <option value={roles.super_infected_hidden}>
-                          Hidden Infector
-                        </option>
-
-                        <option value={roles.super_infected}>Infector</option>
-                        <option value={roles.normal}>Normal</option>
-                      </select>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-            <tfoot>
-              <tr>
-                <th colSpan='2'>
-                  <button
-                    onClick={() => {
-                      submitRole(customRoles);
-                    }}
-                  >
-                    Set Role
-                  </button>
-                </th>
-                <th colSpan='2'>
-                  {playing ? (
-                    'Started'
-                  ) : (
+              {players.map((p) => (
+                <tr key={p._id}>
+                  <td>{p.name}</td>
+                  <td>{p._id}</td>
+                  <td>{p.connected ? 'Connected' : 'Disconnected'}</td>
+                  <td>{p.playing ? 'Playing' : 'Not playing'}</td>
+                  <td>{p.role}</td>
+                  <td>
                     <button
+                      className='btn btn-small btn-danger'
                       onClick={() => {
-                        startGame(mySocket);
+                        deletePlayer(p._id);
                       }}
                     >
-                      Start
+                      X
                     </button>
-                  )}
-                </th>
-              </tr>
-            </tfoot>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
           </table>
         </div>
+        <div className='col-3'>
+          <div className='target-point'>
+            <label htmlFor='target_point'>
+              Target Point
+              <input
+                type='number'
+                id='target_point'
+                value={customPoint}
+                onChange={(event) => {
+                  setCustomPoint(event.target.value);
+                }}
+              />
+            </label>
+            <button
+              className='btn btn-success'
+              onClick={() => {
+                changeTargetPoint(customPoint);
+              }}
+            >
+              Set
+            </button>
+          </div>
+          <div className='roles'>
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Roles</th>
+                </tr>
+              </thead>
+              <tbody>
+                {players.map((player) => {
+                  let p = player;
+                  return (
+                    <tr>
+                      <td>{p.name}</td>
+                      <td>
+                        <select
+                          name='roles'
+                          value={customRoles[p._id]}
+                          onChange={(e) => {
+                            console.log(p._id, e.target.value);
+                            onChangeRole(p._id, e.target.value);
+                          }}
+                        >
+                          <option value={null}>None</option>
+
+                          <option value={roles.doctor}>Doctor</option>
+
+                          <option value={roles.police}>Police</option>
+
+                          <option value={roles.mask_distributor}>
+                            Mask Distributor
+                          </option>
+
+                          <option value={roles.super_infected_hidden}>
+                            Hidden Infector
+                          </option>
+
+                          <option value={roles.super_infected}>Infector</option>
+                          <option value={roles.normal}>Normal</option>
+                        </select>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th colSpan='2'>
+                    <button
+                      onClick={() => {
+                        submitRole(customRoles);
+                      }}
+                    >
+                      Set Role
+                    </button>
+                  </th>
+                  <th colSpan='2'>
+                    {playing ? (
+                      'Started'
+                    ) : (
+                      <button
+                        onClick={() => {
+                          startGame(mySocket);
+                        }}
+                      >
+                        Start
+                      </button>
+                    )}
+                  </th>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
       </div>
-    </div>
+      {gameTableTpl}
+    </Fragment>
   );
 };
 
