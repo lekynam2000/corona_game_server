@@ -290,24 +290,22 @@ export const Game = ({ match, setAlert }) => {
     if (p.name.length > 2) {
       shortName += p.name[2];
     }
-    let top = 20 + Math.random() * 60;
-    let left = 20 + Math.random() * 60;
     return (
       <div
         className={'playerIcon' + p.quarantined ? ' quarantined' : ''}
-        style={{
-          top: top + '%',
-          left: left + '%',
-          backgroundColor: getRandomColor(),
-          position: 'absolute',
-          border: '1px solid black',
-          borderRadius: '50%',
-          width: '45px',
-          height: '45px',
-          textAlign: 'center',
-          lineHeight: '45px',
-          fontWeight: 'bold',
-        }}
+        // style={{
+        //   top: top + '%',
+        //   left: left + '%',
+        //   backgroundColor: getRandomColor(),
+        //   position: 'absolute',
+        //   border: '1px solid black',
+        //   borderRadius: '50%',
+        //   width: '45px',
+        //   height: '45px',
+        //   textAlign: 'center',
+        //   lineHeight: '45px',
+        //   fontWeight: 'bold',
+        // }}
       >
         {shortName}
       </div>

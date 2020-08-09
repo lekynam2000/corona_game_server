@@ -14,11 +14,19 @@ th {
 .gameDetail {
   background-color: #afa;
 }
+.playerIcon {
+  border: 1px solid black;
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  background-color: rgba(100, 131, 123, 0.5);
+}
 .playerIcon.quarantine {
   opacity: 30%;
 }
 .places .card-header {
   height: 120px;
+  overflow: auto;
 }
 .places .card-body {
   height: 30px;
@@ -44,6 +52,10 @@ th {
   -webkit-box-shadow: 2px -2px 15px 3px rgba(17, 150, 100, 1);
   -moz-box-shadow: 2px -2px 15px 3px rgba(17, 150, 100, 1);
   box-shadow: 2px -2px 15px 3px rgba(17, 150, 100, 1);
+}
+.card.places .card-header {
+  display: flex;
+  flex-wrap: wrap;
 }
 .card.sameRoomPlayers {
   background: linear-gradient(0deg, #fdbb2d 0%, #22c1c3 100%);
