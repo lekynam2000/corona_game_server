@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Fragment } from 'react';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { setAlert } from '../../actions/alert';
@@ -446,35 +446,40 @@ export const Game = ({ match, setAlert }) => {
         <div className='card basicInfo'>
           <div className='card-body'>
             <div className='row'>
-              <div className='col-lg-4'>Turn: {turn}</div>
-              <div className='col-lg-4'>Infected: {infected}</div>
-              <div className='col-lg-4'>
-                Point: {point}/{targetPoint}
+              <div className='col-lg-3 border-right border-success'>
+                <p>Turn: {turn}</p>
+                <p>Infected: {infected}</p>
+                <p>
+                  Point: {point}/{targetPoint}
+                </p>
+              </div>
+              <div className='col-lg-9'>
+                {players.length > 0 && (
+                  <div className='row'>
+                    {Object.keys(big3).map((role) => {
+                      if (big3[role] > -1) {
+                        return (
+                          <div className='col-lg-6 role'>
+                            {role}: {players[big3[role]].name}
+                          </div>
+                        );
+                      }
+                    })}
+                    {allies.length > 0 && players.length > 0 && (
+                      <Fragment>
+                        <div className='col-lg-6 role'>
+                          Hidden: {players[allies[0]].name}
+                        </div>
+                        <div className='col'>
+                          Super Infected:{' '}
+                          {allies.map((a) => `${players[a].name} `)}
+                        </div>
+                      </Fragment>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
-            {players.length > 0 && (
-              <div className='row'>
-                {Object.keys(big3).map((role) => {
-                  if (big3[role] > -1) {
-                    return (
-                      <div className='col-lg-4'>
-                        {role}: {players[big3[role]].name}
-                      </div>
-                    );
-                  }
-                })}
-              </div>
-            )}
-            {allies.length > 0 && players.length > 0 && (
-              <div className='row'>
-                <div className='col-lg-3'>
-                  Hidden: {players[allies[0]].name}
-                </div>
-                <div className='col-lg-9'>
-                  Super Infected: {allies.map((a) => `${players[a].name} `)}
-                </div>
-              </div>
-            )}
           </div>
         </div>
         {phaseCard}

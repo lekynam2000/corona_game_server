@@ -124,3 +124,6 @@ ul.selectedPlayers li {
 .btn.desToggle.notShowDes {
   transform: rotate(90deg);
 }
+/* .col.role {
+  white-space: nowrap;
+} */
