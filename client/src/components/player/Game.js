@@ -652,10 +652,10 @@ export const Game = ({ match, setAlert }) => {
             )}
             <div className='row'>
               <div className='col-lg-8'>
-                <ul className='selectedPlayers'>
+                <ul className='selectedPlayers list-group'>
                   {target_button(mySocket, phase, myInfo) != '' &&
                     selected_list.map(({ arr_id, name }) => (
-                      <li>
+                      <li className='list-group-item'>
                         {name}
                         <button
                           className='btn btn-danger btn-small'
