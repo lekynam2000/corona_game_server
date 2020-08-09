@@ -585,9 +585,12 @@ export const Game = ({ match, setAlert }) => {
                   })
                   .map((player) => {
                     let p = player;
-                    console.log(p);
-                    if (big3 && p.arr_id == big3[roles.police]) {
-                      return '';
+                    if (big3 && myInfo && myInfo.role == roles.police) {
+                      for (let key in big3) {
+                        if (p.arr_id == big3[key]) {
+                          return '';
+                        }
+                      }
                     }
                     return (
                       <li
