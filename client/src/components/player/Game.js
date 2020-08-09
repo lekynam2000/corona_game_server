@@ -414,14 +414,25 @@ export const Game = ({ match, setAlert }) => {
   const loggedLayout = (
     <div className='row'>
       <div className='col-lg-2'>
-        <ol className='list-group'>
-          {players.map((p) => (
-            <li className='list-group-item'>
-              {p.name}: {p.place > -1 ? placeName[p.place] : 'None'}{' '}
-              <span className='text-danger'>{p.quarantined ? '(Q)' : ''}</span>
-            </li>
-          ))}
-        </ol>
+        <table>
+          <thead>
+            <th>Name</th>
+            <th>Place</th>
+          </thead>
+          <tbody>
+            {players.map((p) => (
+              <tr>
+                <td>{p.name}</td>{' '}
+                <td>
+                  {p.place > -1 ? placeName[p.place] : 'None'}{' '}
+                  <span className='text-danger'>
+                    {p.quarantined ? '(Q)' : ''}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
       <div className='col-lg-7'>
         <div className='card basicInfo'>
