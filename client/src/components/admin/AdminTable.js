@@ -176,7 +176,7 @@ export const AdminTable = ({ match, setAlert }) => {
                 <td>{p.has_mask ? 'Yes' : 'No'}</td>
                 <td>{p.had_infect ? 'Yes' : 'No'}</td>
                 <td>{p.place > -1 ? placeName[p.place] : 'None'}</td>
-                <td>{p.quaratined ? 'Yes' : 'No'}</td>
+                <td>{p.quarantined ? 'Yes' : 'No'}</td>
               </tr>
             ))}
           </tbody>

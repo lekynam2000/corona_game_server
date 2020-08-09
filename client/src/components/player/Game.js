@@ -144,6 +144,7 @@ export const Game = ({ match, setAlert }) => {
     if (myInfo) {
       if (pList.length < max_select) {
         setAlert(`Must select ${max_select} players`, 'danger');
+        return;
       }
       let id = myInfo._id;
       if (myInfo.role == roles.police) {

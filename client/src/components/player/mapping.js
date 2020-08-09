@@ -10,12 +10,6 @@ const mapping = {
     des:
       'Everyone move to a connected place, except Police. Position of all players will be announce after everyone moved',
   },
-
-  [phases.distribute_mask]: {
-    name: 'Distribute Mask',
-    des:
-      'Mask Distributor select a player to give mask. Selected player will not infect other players or being infected by other players this turn. Give mask to your self is a valid option',
-  },
   [phases.doctor_scan]: {
     name: 'Scan',
     des:
@@ -26,6 +20,12 @@ const mapping = {
     des:
       'Doctor select a player in the same place( Fullerton) to cure. Cure yourself is a valid option',
   },
+  [phases.distribute_mask]: {
+    name: 'Distribute Mask',
+    des:
+      'Mask Distributor select a player to give mask. Selected player will not infect other players or being infected by other players this turn. Give mask to your self is a valid option',
+  },
+
   [phases.super_infect]: {
     name: 'Super Infect',
     des:
