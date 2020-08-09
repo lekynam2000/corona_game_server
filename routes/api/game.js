@@ -131,13 +131,11 @@ router.delete('/room/:id', auth, async (req, res) => {
     if (room.admin.toString() != req.user.id) {
       return res.status(401).json({ msg: 'Unauthorized' });
     }
-    for (let player of room.players) {
-      if (player.connected) {
-        return res
-          .status(400)
-          .json({ msg: 'Cannot delete room with players connected' });
-      }
+
+    if (room.playing) {
+      return res.status(400).json({ msg: 'Cannot delete a playing room' });
     }
+
     const user = await User.findById(room.admin);
     let room_index = -1;
     user.rooms.forEach((room, index) => {
