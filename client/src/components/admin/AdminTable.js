@@ -1,4 +1,4 @@
-import React, { useEffect, useState, Fragment } from 'react';
+import React, { useEffect, useState, Fragment, useRef } from 'react';
 import { connect } from 'react-redux';
 import { withRouter, Link } from 'react-router-dom';
 import { setAlert } from '../../actions/alert';
@@ -6,6 +6,8 @@ import api from '../../utils/api';
 import roles from '../../enum/roles';
 import { server_emit as se, client_emit as ce } from '../../enum/socket-spec';
 import io from 'socket.io-client';
+import phases from '../../../../enum/phases';
+import mapping from '../player/mapping';
 export const AdminTable = ({ match, setAlert }) => {
   const placeName = [
     'Canteen 2',
@@ -30,7 +32,7 @@ export const AdminTable = ({ match, setAlert }) => {
   });
   const [mySocket, setSocket] = useState(null);
   const [endGameMsg, setEngGameMsg] = useState(null);
-
+  const phaseInput = useRef(null);
   useEffect(() => {
     let socket;
     api.get(`/game/room/${match.params.id}`).then((res) => {
@@ -89,6 +91,11 @@ export const AdminTable = ({ match, setAlert }) => {
       .then((res) => {
         setPoint(res.data);
       });
+  }
+  function forceChangePhase(socket) {
+    if (socket && phaseInput.current && phaseInput.current.value) {
+      socket.emit(ce.forceChangePhase, phaseInput.current.value);
+    }
   }
   function onChangeRole(id, role) {
     let f = true;
@@ -150,6 +157,19 @@ export const AdminTable = ({ match, setAlert }) => {
         <p>Number of Corona virus: {game.quara_num}</p>
         <p>Turn: {game.turn}</p>
         <p>Phase: {game.phase}</p>
+        <select ref={phaseInput}>
+          {Object.keys(phases).map((k) => {
+            <option value={phases[k]}>{mapping[phases[k]].name}</option>;
+          })}
+        </select>
+        <button
+          className='btn btn-danger'
+          onClick={() => {
+            forceChangePhase(mySocket);
+          }}
+        >
+          Force Change Phase
+        </button>
         <p>Number of moved players: {game.moved_num}</p>
         <table>
           <thead>
@@ -159,10 +179,10 @@ export const AdminTable = ({ match, setAlert }) => {
               <th>Role</th>
               <th>Infected</th>
               <th>Moved</th>
+              <th>Quara </th>
               <th>Mask</th>
               <th>Had_Infected </th>
               <th>Place</th>
-              <th>Quara </th>
             </tr>
           </thead>
           <tbody>
@@ -173,10 +193,10 @@ export const AdminTable = ({ match, setAlert }) => {
                 <td>{p.role}</td>
                 <td>{p.infected ? 'Yes' : 'No'}</td>
                 <td>{p.moved ? 'Yes' : 'No'}</td>
+                <td>{p.quarantined ? 'Yes' : 'No'}</td>
                 <td>{p.has_mask ? 'Yes' : 'No'}</td>
                 <td>{p.had_infect ? 'Yes' : 'No'}</td>
                 <td>{p.place > -1 ? placeName[p.place] : 'None'}</td>
-                <td>{p.quarantined ? 'Yes' : 'No'}</td>
               </tr>
             ))}
           </tbody>

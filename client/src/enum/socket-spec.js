@@ -35,6 +35,8 @@ export const client_emit = {
   //r_id,
   gameStart: 'gameStart',
   //
+  forceChangePhase: 'forceChangePhase',
+  //assigned_phase
   getInfo: 'getInfo',
   //r_id
   quarantine: 'quarantine',

@@ -14,6 +14,9 @@ module.exports = async function (socket) {
       inScopeId = data;
     });
   });
+  socket.on(ce.forceChangePhase, (assiged_phase) => {
+    forceChangePhase(socket, roomId, nsp, assiged_phase);
+  });
   socket.on(ce.addPlayer, (name) => {
     addPlayer(socket, name, roomId, nsp).then((data) => {
       inScopeId = data;
@@ -78,6 +81,19 @@ function inArray(array, id, keyCompare = null) {
     return index;
   }
   return -1;
+}
+async function forceChangePhase(socket, roomId, nsp, assiged_phase) {
+  const room = await Room.findById(roomId);
+  if (!room || !room.playing || !room.game) {
+    return socket.emit(se.errorGame, { msg: 'Not found room' });
+  }
+  const game = await Game.findById(room.game);
+  if (!game) {
+    return socket.emit(se.errorGame, { msg: 'Game not found' });
+  }
+  game.phase = assiged_phase;
+  await game.save();
+  nsp.emit(se.changePhase, game.phase);
 }
 async function addPlayer(socket, name, roomId, nsp) {
   try {
