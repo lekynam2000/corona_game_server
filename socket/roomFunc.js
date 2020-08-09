@@ -576,6 +576,23 @@ async function random_infect(roomId, nsp) {
     handleError(error, nsp);
   }
 }
+async function revealAlly(socket, roomId, id) {
+  try {
+    const room = await Room.findById(roomId);
+    const game = await Game.findById(room.game);
+    let allies = [-1];
+    for (let player of game.players) {
+      if (player.role == roles.super_infected_hidden) {
+        allies[0] = player.arr_id;
+      } else if (player.role == roles.super_infected) {
+        allies.push(player.arr_id);
+      }
+    }
+    socket.emit(se.revealAlly, allies);
+  } catch (error) {
+    handleError(error, socket);
+  }
+}
 async function endPhase(roomId, nsp) {
   try {
     const room = await Room.findById(roomId);

@@ -9,6 +9,8 @@ const server_emit = {
   //{players: [name,connected,playing]}
   myInfo: 'myInfo',
   //{_id,arr_id,r_id,name,role,infected,disabled,has_mask,had_infect,place,moved,quarantined}
+  revealAlly: 'revealAlly',
+  //[arr_id]
   updateMove: 'updateMove',
   //{players:[arr_id,name,place,quarantined]}
   changePhase: 'changePhase',
@@ -52,6 +54,8 @@ const client_emit = {
   super_infect: 'super_infect',
   //{id,target_id}
   force_disconnect: 'force_disconnect',
+  //{id}
+  get_ally: 'get_ally',
   //{id}
 };
 module.exports = { server_emit, client_emit };

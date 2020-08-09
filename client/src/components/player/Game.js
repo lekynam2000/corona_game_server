@@ -40,6 +40,7 @@ export const Game = ({ match, setAlert }) => {
   const [point, setPoint] = useState(0);
   const [quara_num, setQuaraNum] = useState(0);
   const [big3, setBig3] = useState({});
+  const [allies, setAllies] = useState([]);
   const [infected, setInfected] = useState(0);
   const [selected_list, setList] = useState([]);
   const [max_select, setMaxSelect] = useState(0);
@@ -70,6 +71,12 @@ export const Game = ({ match, setAlert }) => {
       if (player.role != roles.normal && player.role != roles.police) {
         setMaxSelect(1);
       }
+      if (
+        player.role == roles.super_infected ||
+        player.role == roles.super_infected_hidden
+      ) {
+        socket.emit(ce.get_ally, player._id);
+      }
     });
     socket.on(se.basicSetup, (msg) => {
       setMap(msg.map);
@@ -78,6 +85,9 @@ export const Game = ({ match, setAlert }) => {
       setBig3(msg.big3);
       let r_id = sessionStorage.getItem('r_id');
       socket.emit(ce.getInfo, r_id);
+    });
+    socket.on(se.revealAlly, (list) => {
+      setAllies(list);
     });
     socket.on(se.changePhase, (msg) => {
       setPhase(msg);
@@ -453,6 +463,16 @@ export const Game = ({ match, setAlert }) => {
                     );
                   }
                 })}
+              </div>
+            )}
+            {allies.length > 0 && players.length > 0 && (
+              <div className='row'>
+                <div className='col-lg-3'>
+                  Hidden: {players[allies[0]].name}
+                </div>
+                <div className='col-lg-9'>
+                  Super Infected: {allies.map((a) => `${player[a].name} `)}
+                </div>
               </div>
             )}
           </div>
