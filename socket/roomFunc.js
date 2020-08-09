@@ -30,6 +30,9 @@ module.exports = async function (socket) {
   socket.on(ce.getInfo, (r_id) => {
     getInfo(socket, roomId, r_id);
   });
+  socket.on(ce.get_ally, (id) => {
+    revealAlly(socket, roomId, id);
+  });
   socket.on(ce.quarantine, (msg) => {
     quarantine(socket, msg.id, roomId, nsp, msg.pList);
   });

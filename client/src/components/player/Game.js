@@ -87,6 +87,7 @@ export const Game = ({ match, setAlert }) => {
       socket.emit(ce.getInfo, r_id);
     });
     socket.on(se.revealAlly, (list) => {
+      console.log(list);
       setAllies(list);
     });
     socket.on(se.changePhase, (msg) => {
@@ -168,7 +169,6 @@ export const Game = ({ match, setAlert }) => {
     if (!info) {
       return '';
     }
-    console.log('role', info.role);
     switch (info.role) {
       case roles.doctor:
         if (phase == phases.doctor_cure && info.place == 6) {
@@ -302,7 +302,7 @@ export const Game = ({ match, setAlert }) => {
     }
     return (
       <div
-        className={'playerIcon' + p.quarantined ? ' quarantined' : ''}
+        className={'playerIcon' + (p.quarantined ? ' quarantined' : '')}
         // style={{
         //   top: top + '%',
         //   left: left + '%',
@@ -471,7 +471,7 @@ export const Game = ({ match, setAlert }) => {
                   Hidden: {players[allies[0]].name}
                 </div>
                 <div className='col-lg-9'>
-                  Super Infected: {allies.map((a) => `${player[a].name} `)}
+                  Super Infected: {allies.map((a) => `${players[a].name} `)}
                 </div>
               </div>
             )}
@@ -501,13 +501,18 @@ export const Game = ({ match, setAlert }) => {
                         className={'card places' + (active ? ' active' : '')}
                       >
                         <div className='card-header'>
-                          {players.map((p) => {
-                            if (p.place == i) {
-                              return playerTpl(p);
-                            } else {
-                              return '';
-                            }
-                          })}
+                          <div className='highlevelWrapper'>
+                            <div className='playerIconWrapper'>
+                              {players.map((p) => {
+                                if (p.place == i) {
+                                  return playerTpl(p);
+                                } else {
+                                  return '';
+                                }
+                              })}
+                            </div>
+                          </div>
+
                           <img
                             src={placeImg[i]}
                             alt={placeName[i]}
@@ -597,8 +602,10 @@ export const Game = ({ match, setAlert }) => {
             </div>
           </div>
         </div>
-        <div className='card'>
-          <img src={NTUmap} height='180' alt='map' />
+        <div className='card map'>
+          <a target='_blank' href={NTUmap}>
+            <img src={NTUmap} height='120' alt='map' />
+          </a>
         </div>
 
         <div className='card sameRoomPlayers'>

@@ -6,7 +6,6 @@ import api from '../../utils/api';
 import roles from '../../enum/roles';
 import { server_emit as se, client_emit as ce } from '../../enum/socket-spec';
 import io from 'socket.io-client';
-import phases from '../../../../enum/phases';
 import mapping from '../player/mapping';
 export const AdminTable = ({ match, setAlert }) => {
   const placeName = [
@@ -158,9 +157,9 @@ export const AdminTable = ({ match, setAlert }) => {
         <p>Turn: {game.turn}</p>
         <p>Phase: {game.phase}</p>
         <select ref={phaseInput}>
-          {Object.keys(mapping).map((k) => {
-            <option value={k}>{mapping[k].name}</option>;
-          })}
+          {Object.keys(mapping).map((k) => (
+            <option value={k}>{mapping[k].name}</option>
+          ))}
         </select>
         <button
           className='btn btn-danger'
