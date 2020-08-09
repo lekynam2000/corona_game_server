@@ -158,8 +158,8 @@ export const AdminTable = ({ match, setAlert }) => {
         <p>Turn: {game.turn}</p>
         <p>Phase: {game.phase}</p>
         <select ref={phaseInput}>
-          {Object.keys(phases).map((k) => {
-            <option value={phases[k]}>{mapping[phases[k]].name}</option>;
+          {Object.keys(mapping).map((k) => {
+            <option value={k}>{mapping[k].name}</option>;
           })}
         </select>
         <button
