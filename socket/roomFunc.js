@@ -509,6 +509,7 @@ async function super_infect(socket, roomId, id, nsp, target_id) {
       game.players[target_id].infected = true;
     }
     game.infected_num++;
+    game.players[index].had_infect = true;
     if (game.infected_num == game.quara_num) {
       game.phase = phases.random_infect;
     }
