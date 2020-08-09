@@ -501,7 +501,11 @@ async function super_infect(socket, roomId, id, nsp, target_id) {
     if (game.players[index].had_infect || game.players[index].quarantined) {
       return socket.emit(se.errorGame, { msg: 'Cannot infect' });
     }
-    if (!game.players[index].has_mask && !game.players[target_id].has_mask) {
+    if (
+      !game.players[index].has_mask &&
+      !game.players[target_id].has_mask &&
+      !game.players[target_id].quarantined
+    ) {
       game.players[target_id].infected = true;
     }
     game.infected_num++;
@@ -566,7 +570,10 @@ async function random_infect(roomId, nsp) {
           infected_id =
             place[currentPlace][getRandomInt(place[currentPlace].length)];
         }
-        if (game.players[infected_id].role == roles.normal) {
+        if (
+          game.players[infected_id].role == roles.normal &&
+          !game.players[infected_id].quarantined
+        ) {
           game.players[infector_id].infected = true;
         }
       }
