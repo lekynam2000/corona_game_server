@@ -1,3 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Alegreya:wght@400;500;700&display=swap');
+body {
+  font-family: 'Alegreya', serif;
+  background-color: #00735caf;
+}
 .container > .row {
   margin-right: -50px;
 }
@@ -13,6 +18,29 @@ td {
 
 th {
   text-align: center;
+}
+table.playerList {
+  background-color: #fff;
+  -webkit-box-shadow: 0px 0px 11px 3px rgba(135, 203, 40, 1);
+  -moz-box-shadow: 0px 0px 11px 3px rgba(135, 203, 40, 1);
+  box-shadow: 0px 0px 11px 3px rgba(135, 203, 40, 1);
+  /* color: white; */
+}
+table.playerList td,
+th {
+  border-color: black;
+}
+table.playerList th {
+  background-color: #ffdb15;
+}
+table.playerList td {
+  padding-left: 5px;
+}
+.card.basicInfo,
+.card.personalInfo {
+  -webkit-box-shadow: 0px 0px 11px 3px rgba(135, 203, 40, 1);
+  -moz-box-shadow: 0px 0px 11px 3px rgba(135, 203, 40, 1);
+  box-shadow: 0px 0px 11px 3px rgba(135, 203, 40, 1);
 }
 .card-body {
   padding: 5px;
@@ -33,12 +61,23 @@ th {
   font-weight: 600;
   background-color: rgba(165, 185, 175, 0.9);
 }
-.playerIcon.quarantine {
-  opacity: 30%;
+.playerIcon.quarantined {
+  background-color: #555555;
+  color: white;
 }
 .places .card-header {
   height: 120px;
   overflow: auto;
+  border: none;
+}
+.quaraZone .places .card-header {
+  height: 150px;
+}
+.card.places {
+  background-color: rgba(0, 0, 0, 0);
+  color: #fff;
+  font-weight: 600;
+  border: none;
 }
 .places .card-body {
   height: 30px;
@@ -56,9 +95,18 @@ th {
   height: 100%;
   width: 100%;
 }
-
+.placeCardWrapper {
+  padding: 60px 35px;
+  padding-top: 10px;
+}
+.card.places {
+  margin-bottom: 0px;
+}
+.card.places .card-header {
+  padding: 0;
+}
 .card.places .card-img-top {
-  opacity: 0.8;
+  opacity: 1;
 }
 .card.places:hover {
   cursor: not-allowed;
@@ -76,19 +124,28 @@ th {
 .highlevelWrapper {
   position: absolute;
   z-index: 999;
+  width: 100%;
+  height: 100%;
 }
 .playerIconWrapper {
   display: flex;
   flex-wrap: wrap;
 }
 .card.sameRoomPlayers {
-  background: linear-gradient(0deg, #fdbb2d 0%, #22c1c3 100%);
+  background-color: #00735c;
+  color: white;
   /* background-size: 400% 400%; */
+}
+.card.card.sameRoomPlayers li.head {
+  background-color: #ffdb15;
+  color: black;
 }
 .card.sameRoomPlayers li {
   font-weight: 600;
   border: 1px solid black;
-  background-color: rgba(17, 150, 100, 0);
+  background-color: white;
+  color: black;
+  padding: 5px;
 }
 .card.sameRoomPlayers li.sameRoom:hover {
   cursor: pointer;
@@ -129,4 +186,45 @@ ul.selectedPlayers li {
 } */
 .btn.phaseBtn {
   line-height: 25px;
+}
+.pm15 {
+  padding-left: -15px;
+  padding-right: -15px;
+}
+.placeCardList {
+  background-image: url(img/mapBG.jpg);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  border: none;
+  -webkit-box-shadow: 0px 0px 11px 3px rgba(135, 203, 40, 1);
+  -moz-box-shadow: 0px 0px 11px 3px rgba(135, 203, 40, 1);
+  box-shadow: 0px 0px 11px 3px rgba(135, 203, 40, 1);
+}
+.phaseCard .card-header {
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+.bg-normal {
+  background-color: #6b3e0add;
+  color: white;
+}
+.bg-special {
+  background-color: #3f407edd;
+  color: white;
+}
+.bg-allies {
+  background-color: #ff0000dd;
+  color: white;
+}
+.targetBtnWrapper {
+  text-align: right;
+}
+.targetBtnWrapper button {
+  display: inline-block;
+  height: 100%;
+}
+.title {
+  background-color: rgba(0, 0, 0, 0);
+  color: #ffdb15;
 }

@@ -14,14 +14,15 @@ import nyAudi from '../../img/ny_audi.jpg';
 import theHive from '../../img/the_hive.jpg';
 import YuuGar from '../../img/yg.jpg';
 import Hall6 from '../../img/hall6.jpg';
-import Fullerton from '../../img/fullerton.png';
+import Fullerton from '../../img/fullerton.jpg';
 import Quara from '../../img/quara.jpg';
 import NTUmap from '../../img/NTUmap.jpg';
+import mapBG from '../../img/mapBG.png';
 export const Game = ({ match, setAlert }) => {
   const placeName = [
     'Canteen 2',
     'The Arc',
-    'Nanyang Auditorium',
+    'Nanyang Audi',
     'The Hive',
     'Yunnan Garden',
     'Hall 6',
@@ -176,6 +177,7 @@ export const Game = ({ match, setAlert }) => {
           return (
             mySocket && (
               <button
+                className='btn btn-primary'
                 onClick={() => {
                   target_action(mySocket, ce.doctor_cure, selected_list);
                 }}
@@ -188,6 +190,7 @@ export const Game = ({ match, setAlert }) => {
           return (
             mySocket && (
               <button
+                className='btn btn-primary'
                 onClick={() => {
                   doctor_scan(mySocket);
                 }}
@@ -203,6 +206,7 @@ export const Game = ({ match, setAlert }) => {
         if (phase == phases.distribute_mask) {
           return (
             <button
+              className='btn btn-primary'
               onClick={() => {
                 target_action(mySocket, ce.distribute_mask, selected_list);
               }}
@@ -219,6 +223,7 @@ export const Game = ({ match, setAlert }) => {
           return (
             mySocket && (
               <button
+                className='btn btn-danger'
                 onClick={() => {
                   target_action(mySocket, ce.super_infect, selected_list);
                 }}
@@ -295,6 +300,24 @@ export const Game = ({ match, setAlert }) => {
   }
   const playerTpl = (p) => {
     let shortName = p.name[0];
+    let bgClass = 'bg-normal';
+    if (big3) {
+      for (let key in big3) {
+        if (p.arr_id == big3[key]) {
+          bgClass = 'bg-special';
+          break;
+        }
+      }
+    }
+
+    if (bgClass == 'bg-normal' && allies.length > 0) {
+      for (let a of allies) {
+        if (p.arr_id == a) {
+          bgClass = 'bg-allies';
+          break;
+        }
+      }
+    }
     if (p.name.length > 1) {
       shortName += p.name[1];
     }
@@ -303,7 +326,9 @@ export const Game = ({ match, setAlert }) => {
     }
     return (
       <div
-        className={'playerIcon' + (p.quarantined ? ' quarantined' : '')}
+        className={
+          'playerIcon' + (p.quarantined ? ' quarantined ' : ' ' + bgClass)
+        }
         // style={{
         //   top: top + '%',
         //   left: left + '%',
@@ -318,45 +343,29 @@ export const Game = ({ match, setAlert }) => {
         //   fontWeight: 'bold',
         // }}
       >
-        P{p.arr_id}
+        {shortName}
       </div>
     );
   };
   const phaseCard = phase && (
-    <div className='card phaseCard mt-1 mb-3'>
+    <div className='card phaseCard mt-3 mb-3'>
       <div className='card-header'>
         <div className='row'>
           {Object.keys(mapping).map((ph) => {
             let p = ph;
             return (
-              <button
+              <div
                 className={
                   'btn mr-1 phaseBtn ' +
-                  (p == phase ? 'btn-primary' : 'btn-danger')
+                  (p == phase ? 'btn-primary' : 'btn-danger bg-allies')
                 }
-                disabled={!(p == phase)}
               >
                 {mapping[p].name}
-              </button>
+              </div>
             );
           })}
-          <button
-            className={
-              'btn btn-primary desToggle ' + (showPhaseDes ? '' : 'notShowDes')
-            }
-            onClick={() => {
-              setShowPhaseDes((x) => !x);
-            }}
-          >
-            &gt;
-          </button>
         </div>
       </div>
-      {showPhaseDes && (
-        <div className='card-body'>
-          <p>{mapping[phase] && mapping[phase].des}</p>
-        </div>
-      )}
     </div>
   );
   const notLoggedLayout = (
@@ -424,23 +433,36 @@ export const Game = ({ match, setAlert }) => {
   const loggedLayout = (
     <div className='row'>
       <div className='col-lg-2'>
-        <table>
+        <table className='playerList'>
           <thead>
             <th>Name</th>
             <th>Place</th>
           </thead>
           <tbody>
-            {players.map((p) => (
-              <tr>
-                <td>{p.name}</td>{' '}
-                <td>
-                  {p.place > -1 ? placeName[p.place] : 'None'}{' '}
-                  <span className='text-danger'>
-                    {p.quarantined ? '(Q)' : ''}
-                  </span>
-                </td>
-              </tr>
-            ))}
+            {players.map((p) => {
+              let bgClass = '';
+              if (big3) {
+                for (let key in big3) {
+                  if (p.arr_id == big3[key]) {
+                    bgClass = 'bg-special';
+                  }
+                  if (p.quarantined) {
+                    bgClass = 'bg-allies';
+                  }
+                }
+              }
+              return (
+                <tr className={bgClass}>
+                  <td>{p.name}</td>{' '}
+                  <td>
+                    {p.place > -1 ? placeName[p.place] : 'None'}{' '}
+                    <span className='text-danger'>
+                      {p.quarantined ? '(Q)' : ''}
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -491,10 +513,10 @@ export const Game = ({ match, setAlert }) => {
           </div>
         </div>
         {phaseCard}
-        <div className='card'>
+        <div className='card placeCardList'>
           {endGameMsg && <div className='card-header'>{endGameMsg}</div>}
           <div className='card-body'>
-            <div className='row'>
+            <div className='row pm15'>
               {prettyOrder.map((i) => {
                 if (i > -1) {
                   let active =
@@ -505,9 +527,10 @@ export const Game = ({ match, setAlert }) => {
                     !myInfo.role == roles.police &&
                     !myInfo.moved &&
                     (myInfo.place == -1 || map[i][myInfo.place]);
+                  // active = true;
                   return (
                     <div
-                      className='col-lg-4'
+                      className='col-lg-4 placeCardWrapper'
                       onClick={() => {
                         move(mySocket, i, myInfo);
                       }}
@@ -541,33 +564,7 @@ export const Game = ({ match, setAlert }) => {
                     </div>
                   );
                 } else if (i == -1) {
-                  return (
-                    <div className='col-lg-4 quaraZone'>
-                      <div className={'card places'}>
-                        <div className='card-header'>
-                          <div className='highlevelWrapper'>
-                            <div className='playerIconWrapper'>
-                              {players.map((p) => {
-                                if (p.quarantined) {
-                                  return playerTpl(p);
-                                } else {
-                                  return '';
-                                }
-                              })}
-                              <img
-                                src={Quara}
-                                alt='Quarantine Zone'
-                                className='card-img-top'
-                              />
-                            </div>
-                          </div>
-                        </div>
-                        <div className='card-body'>
-                          <p className='card-text'>Quarantine Zone</p>
-                        </div>
-                      </div>
-                    </div>
-                  );
+                  return <div className='col-lg-4'></div>;
                 } else {
                   return <div className='col-lg-4'></div>;
                 }
@@ -577,7 +574,7 @@ export const Game = ({ match, setAlert }) => {
         </div>
       </div>
       <div className='col-lg-3'>
-        <div className='card personalInfo'>
+        <div className='card personalInfo mb-3'>
           <div className='card-body'>
             <div className='row'>
               <div className='col-lg-12'>
@@ -606,21 +603,21 @@ export const Game = ({ match, setAlert }) => {
             <div className='row ml-0'>
               {myInfo.infected && (
                 <div className=''>
-                  <div className='btn btn-danger  p-2'>infected</div>
+                  <div className='btn btn-danger  p-2 bg-allies'>infected</div>
                 </div>
               )}
 
               {myInfo.moved && (
                 <div className=''>
-                  <div className='btn btn-success p-2'>moved</div>
+                  <div className='btn btn-primary p-2'>moved</div>
                 </div>
               )}
-              {(myInfo.quarantined || true) && (
+              {myInfo.quarantined && (
                 <div className=''>
                   <div className='btn btn-secondary p-2'>quarantined</div>
                 </div>
               )}
-              {(myInfo.had_infect || true) && (
+              {myInfo.had_infect && (
                 <div className=''>
                   <div className='btn btn-warning p-2'>infection executed</div>
                 </div>
@@ -628,16 +625,36 @@ export const Game = ({ match, setAlert }) => {
             </div>
           </div>
         </div>
-        <div className='card map'>
-          <a target='_blank' href={NTUmap}>
-            <img src={NTUmap} height='120' alt='map' />
-          </a>
+        <div className='quaraZone'>
+          <div className={'card places'}>
+            <div className='card-header'>
+              <div className='highlevelWrapper'>
+                <div className='playerIconWrapper'>
+                  {players.map((p) => {
+                    if (p.quarantined) {
+                      return playerTpl(p);
+                    } else {
+                      return '';
+                    }
+                  })}
+                  <img
+                    src={Quara}
+                    alt='Quarantine Zone'
+                    className='card-img-top'
+                  />
+                </div>
+              </div>
+            </div>
+            <div className='card-body'>
+              <p className='card-text'></p>
+            </div>
+          </div>
         </div>
 
         <div className='card sameRoomPlayers'>
           <div className='card-body'>
             <ul className='list-group'>
-              <li className='list-group-item'>Players in same place:</li>
+              <li className='list-group-item head'>Players in same place:</li>
               {players &&
                 players
                   .filter((p) => {
@@ -671,26 +688,28 @@ export const Game = ({ match, setAlert }) => {
                 Detected {scanResult} infection in current place
               </p>
             )}
-            <div className='row'>
-              <div className='col-lg-8'>
+            <div className='row justify-content-end'>
+              <div className='col-lg'>
                 <ul className='selectedPlayers list-group'>
                   {target_button(mySocket, phase, myInfo) != '' &&
                     selected_list.map(({ arr_id, name }) => (
                       <li className='list-group-item'>
-                        {name}
-                        <button
-                          className='btn btn-danger btn-small'
-                          onClick={() => {
-                            deleteFromList(arr_id);
-                          }}
-                        >
-                          x
-                        </button>
+                        <div className='d-flex justify-content-between'>
+                          {name}
+                          <button
+                            className='btn btn-danger btn-small p-0 pl-1 pr-1'
+                            onClick={() => {
+                              deleteFromList(arr_id);
+                            }}
+                          >
+                            X
+                          </button>
+                        </div>
                       </li>
                     ))}
                 </ul>
               </div>
-              <div className='col-lg-3'>
+              <div className='col-lg targetBtnWrapper'>
                 {target_button(mySocket, phase, myInfo)}
               </div>
             </div>
@@ -699,6 +718,15 @@ export const Game = ({ match, setAlert }) => {
       </div>
     </div>
   );
-  return logged ? loggedLayout : notLoggedLayout;
+  return (
+    <Fragment>
+      {!logged && (
+        <div className='jumbotron title pt-0 pb-0'>
+          <div className='display-4 text-center'>CORONA at Nanyang Village</div>
+        </div>
+      )}
+      {logged ? loggedLayout : notLoggedLayout}
+    </Fragment>
+  );
 };
 export default connect(null, { setAlert })(withRouter(Game));
