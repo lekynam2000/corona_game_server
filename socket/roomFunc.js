@@ -96,7 +96,8 @@ async function forceChangePhase(socket, roomId, nsp, assiged_phase) {
   }
   game.phase = assiged_phase;
   await game.save();
-  nsp.emit(se.changePhase, game.phase);
+  // nsp.emit(se.changePhase, game.phase);
+  extractBasicInfo(nsp, game);
 }
 async function addPlayer(socket, name, roomId, nsp) {
   try {
