@@ -52,7 +52,6 @@ table.playerList td {
   background-color: #afa;
 }
 .playerIcon {
-  border: 1px solid black;
   border-radius: 50%;
   width: 40px;
   height: 40px;
@@ -227,4 +226,7 @@ ul.selectedPlayers li {
 .title {
   background-color: rgba(0, 0, 0, 0);
   color: #ffdb15;
+}
+.text-little {
+  font-size: 0.89rem;
 }

@@ -240,6 +240,7 @@ export const Game = ({ match, setAlert }) => {
           return (
             mySocket && (
               <button
+                className='btn btn-primary'
                 onClick={() => {
                   target_action(mySocket, ce.quarantine, selected_list);
                 }}
@@ -479,6 +480,9 @@ export const Game = ({ match, setAlert }) => {
                 </p>
                 <p>
                   <b>Point:</b> {point}/{targetPoint}
+                </p>
+                <p className='text-little'>
+                  <b>Quarantine:</b> {quara_num}
                 </p>
               </div>
               <div className='col-lg'>

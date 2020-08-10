@@ -7,6 +7,8 @@ import roles from '../../enum/roles';
 import { server_emit as se, client_emit as ce } from '../../enum/socket-spec';
 import io from 'socket.io-client';
 import mapping from '../player/mapping';
+import nameMap from '../player/vnName';
+import NTUmap from '../../img/NTUmap.jpg';
 export const AdminTable = ({ match, setAlert }) => {
   const placeName = [
     'Canteen 2',
@@ -119,7 +121,7 @@ export const AdminTable = ({ match, setAlert }) => {
     console.log('roles', roles);
     for (let key in remainRoles) {
       if (remainRoles[key]) {
-        setAlert('Not enough role', 'danger');
+        setAlert('Nt enough role', 'danger');
         return;
       }
     }
@@ -170,6 +172,7 @@ export const AdminTable = ({ match, setAlert }) => {
           Force Change Phase
         </button>
         <p>Number of moved players: {game.moved_num}</p>
+        <img src={NTUmap} alt='NTU Map' height='200' />
         <table>
           <thead>
             <tr>
@@ -178,7 +181,6 @@ export const AdminTable = ({ match, setAlert }) => {
               <th>Role</th>
               <th>Infected</th>
               <th>Moved</th>
-              <th>Quara </th>
               <th>Mask</th>
               <th>Had_Infected </th>
               <th>Place</th>
@@ -189,12 +191,14 @@ export const AdminTable = ({ match, setAlert }) => {
               <tr>
                 <td>{p.arr_id}</td>
                 <td>{p.name}</td>
-                <td>{p.role}</td>
-                <td>{p.infected ? 'Yes' : 'No'}</td>
-                <td>{p.moved ? 'Yes' : 'No'}</td>
-                <td>{p.quarantined ? 'Yes' : 'No'}</td>
-                <td>{p.has_mask ? 'Yes' : 'No'}</td>
-                <td>{p.had_infect ? 'Yes' : 'No'}</td>
+                <td>{nameMap[p.role]}</td>
+                <td>{p.infected ? 'Y' : 'No'}</td>
+                <td>
+                  {p.moved ? 'Y' : 'No'} {p.quarantined ? '(Quara)' : ''}
+                </td>
+                {/* <td>{p.quarantined ? 'Y' : 'No'}</td> */}
+                <td>{p.has_mask ? 'Y' : 'No'}</td>
+                <td>{p.had_infect ? 'Y' : 'No'}</td>
                 <td>{p.place > -1 ? placeName[p.place] : 'None'}</td>
               </tr>
             ))}
@@ -205,7 +209,7 @@ export const AdminTable = ({ match, setAlert }) => {
   );
   return (
     <Fragment>
-      <div className='row'>
+      <div className='row gameDetail'>
         <div className='col-9'>
           <h2>
             Room Id:{' '}
@@ -229,7 +233,7 @@ export const AdminTable = ({ match, setAlert }) => {
                   <td>{p._id}</td>
                   <td>{p.connected ? 'Connected' : 'Disconnected'}</td>
                   <td>{p.playing ? 'Playing' : 'Not playing'}</td>
-                  <td>{p.role}</td>
+                  <td>{nameMap[p.role]}</td>
                   <td>
                     <button
                       className='btn btn-small btn-danger'
@@ -290,22 +294,13 @@ export const AdminTable = ({ match, setAlert }) => {
                             onChangeRole(p._id, e.target.value);
                           }}
                         >
-                          <option value={null}>None</option>
+                          <option value={null}>Nne</option>
 
-                          <option value={roles.doctor}>Doctor</option>
-
-                          <option value={roles.police}>Police</option>
-
-                          <option value={roles.mask_distributor}>
-                            Mask Distributor
-                          </option>
-
-                          <option value={roles.super_infected_hidden}>
-                            Hidden Infector
-                          </option>
-
-                          <option value={roles.super_infected}>Infector</option>
-                          <option value={roles.normal}>Normal</option>
+                          {Object.keys(roles).map((k) => (
+                            <option value={roles[k]}>
+                              {nameMap[roles[k]]}
+                            </option>
+                          ))}
                         </select>
                       </td>
                     </tr>
