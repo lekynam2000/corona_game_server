@@ -535,18 +535,22 @@ export const Game = ({ match, setAlert }) => {
                     <div className='col-lg-4 quaraZone'>
                       <div className={'card places'}>
                         <div className='card-header'>
-                          {players.map((p) => {
-                            if (p.quarantined) {
-                              return playerTpl(p);
-                            } else {
-                              return '';
-                            }
-                          })}
-                          <img
-                            src={Quara}
-                            alt='Quarantine Zone'
-                            className='card-img-top'
-                          />
+                          <div className='highlevelWrapper'>
+                            <div className='playerIconWrapper'>
+                              {players.map((p) => {
+                                if (p.quarantined) {
+                                  return playerTpl(p);
+                                } else {
+                                  return '';
+                                }
+                              })}
+                              <img
+                                src={Quara}
+                                alt='Quarantine Zone'
+                                className='card-img-top'
+                              />
+                            </div>
+                          </div>
                         </div>
                         <div className='card-body'>
                           <p className='card-text'>Quarantine Zone</p>
