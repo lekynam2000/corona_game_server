@@ -494,6 +494,7 @@ export const Game = ({ match, setAlert }) => {
                     map &&
                     myInfo &&
                     !myInfo.quarantined &&
+                    !myInfo.role == roles.police &&
                     !myInfo.moved &&
                     (myInfo.place == -1 || map[i][myInfo.place]);
                   return (
