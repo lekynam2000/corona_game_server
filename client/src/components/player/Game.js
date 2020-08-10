@@ -493,6 +493,7 @@ export const Game = ({ match, setAlert }) => {
                     phase == phases.move &&
                     map &&
                     myInfo &&
+                    !myInfo.quarantined &&
                     !myInfo.moved &&
                     (myInfo.place == -1 || map[i][myInfo.place]);
                   return (
