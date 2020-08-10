@@ -316,7 +316,7 @@ async function move(socket, roomId, nsp, arr_id, target) {
     const room = await Room.findById(roomId);
     const game = await Game.findById(room.game);
     if (game.phase != phases.move) {
-      return nsp.emit(se.errorGame, { msg: 'Move in wrong phase' });
+      return socket.emit(se.errorGame, { msg: 'Move in wrong phase' });
     }
     // const player = game.players[arr_id];
     console.log(arr_id, target);
