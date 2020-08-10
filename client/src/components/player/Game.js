@@ -7,6 +7,7 @@ import roles from '../../enum/roles';
 import phases from '../../enum/phases';
 import { server_emit as se, client_emit as ce } from '../../enum/socket-spec';
 import mapping from './mapping';
+import nameMap from './vnName';
 import Can2 from '../../img/canteen2.jpg';
 import theArc from '../../img/the_arc.jpg';
 import nyAudi from '../../img/ny_audi.jpg';
@@ -317,7 +318,7 @@ export const Game = ({ match, setAlert }) => {
         //   fontWeight: 'bold',
         // }}
       >
-        {shortName}
+        P{p.arr_id}
       </div>
     );
   };
@@ -330,7 +331,8 @@ export const Game = ({ match, setAlert }) => {
             return (
               <button
                 className={
-                  'btn mr-1 ' + (p == phase ? 'btn-primary' : 'btn-danger')
+                  'btn mr-1 phaseBtn ' +
+                  (p == phase ? 'btn-primary' : 'btn-danger')
                 }
                 disabled={!(p == phase)}
               >
@@ -446,39 +448,45 @@ export const Game = ({ match, setAlert }) => {
         <div className='card basicInfo'>
           <div className='card-body'>
             <div className='row'>
-              <div className='col-lg-3 border-right border-success'>
-                <p>Turn: {turn}</p>
-                <p>Infected: {infected}</p>
+              <div className='col-lg-2 border-right border-success'>
                 <p>
-                  Point: {point}/{targetPoint}
+                  <b>Turn:</b> {turn}
+                </p>
+                <p>
+                  <b>Infected:</b> {infected}
+                </p>
+                <p>
+                  <b>Point:</b> {point}/{targetPoint}
                 </p>
               </div>
-              <div className='col-lg-9'>
+              <div className='col-lg'>
                 {players.length > 0 && (
                   <div className='row'>
                     {Object.keys(big3).map((role) => {
                       if (big3[role] > -1) {
                         return (
-                          <div className='col-lg-6 role'>
-                            {role}: {players[big3[role]].name}
+                          <div className='col-lg-12 role'>
+                            <b>{nameMap[role]}:</b>{' '}
+                            <span className=''>{players[big3[role]].name}</span>
                           </div>
                         );
                       }
                     })}
-                    {allies.length > 0 && players.length > 0 && (
-                      <Fragment>
-                        <div className='col-lg-6 role'>
-                          Hidden: {players[allies[0]].name}
-                        </div>
-                        <div className='col'>
-                          Super Infected:{' '}
-                          {allies.map((a) => `${players[a].name} `)}
-                        </div>
-                      </Fragment>
-                    )}
                   </div>
                 )}
               </div>
+              {allies.length > 0 && players.length > 0 && (
+                <div className='col-lg-4 border-left border-success'>
+                  <p>
+                    <b>{nameMap[roles.super_infected]}:</b>
+                  </p>
+                  {allies.map((a) => (
+                    <p className=''>
+                      {players[a].name + (a == allies[0] ? ' (Ẩn)' : '')}
+                    </p>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -573,41 +581,48 @@ export const Game = ({ match, setAlert }) => {
           <div className='card-body'>
             <div className='row'>
               <div className='col-lg-12'>
+                <b>You are:</b> <span className=''>P{myInfo.arr_id}</span>
+              </div>
+            </div>
+            <div className='row'>
+              <div className='col-lg-12'>
                 <b>Name:</b> {myInfo.name}
               </div>
             </div>
             <div className='row'>
               <div className='col-lg-12'>
-                <b>Role:</b> {myInfo.role}{' '}
+                <b>Role:</b> {nameMap[myInfo.role]}{' '}
               </div>
             </div>
             <div className='row'>
               <div className='col-lg-12'>
-                {myInfo.place > -1 && `Place: ${placeName[myInfo.place]}`}
+                {myInfo.place > -1 && (
+                  <p>
+                    <b>Place:</b> {placeName[myInfo.place]}
+                  </p>
+                )}
               </div>
             </div>
-            <div className='row'>
+            <div className='row ml-0'>
               {myInfo.infected && (
-                <div className='col-lg-4'>
-                  <div className='btn btn-danger btn-small'>infected</div>
+                <div className=''>
+                  <div className='btn btn-danger  p-2'>infected</div>
                 </div>
               )}
 
               {myInfo.moved && (
-                <div className='col-lg-4'>
-                  <div className='btn btn-success btn-small'>moved</div>
+                <div className=''>
+                  <div className='btn btn-success p-2'>moved</div>
                 </div>
               )}
-              {myInfo.quarantined && (
-                <div className='col-lg-4'>
-                  <div className='btn btn-secondary btn-small'>quarantined</div>
+              {(myInfo.quarantined || true) && (
+                <div className=''>
+                  <div className='btn btn-secondary p-2'>quarantined</div>
                 </div>
               )}
-              {myInfo.had_infect && (
-                <div className='col-lg-12'>
-                  <div className='btn btn-warning btn-small'>
-                    infection executed
-                  </div>
+              {(myInfo.had_infect || true) && (
+                <div className=''>
+                  <div className='btn btn-warning p-2'>infection executed</div>
                 </div>
               )}
             </div>

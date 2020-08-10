@@ -10,7 +10,7 @@ th,
 td {
   border: 1px solid black;
 }
-td,
+
 th {
   text-align: center;
 }
@@ -111,9 +111,9 @@ ul.selectedPlayers li {
 .container {
   margin-top: 20px;
 }
-.basicInfo {
+/* .basicInfo {
   text-align: center;
-}
+} */
 .btn.desToggle {
   transition: ease-in-out 0.5s;
   transform: rotate(270deg);
@@ -127,3 +127,6 @@ ul.selectedPlayers li {
 /* .col.role {
   white-space: nowrap;
 } */
+.btn.phaseBtn {
+  line-height: 25px;
+}
