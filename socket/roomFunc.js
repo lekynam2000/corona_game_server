@@ -586,7 +586,7 @@ async function random_infect(roomId, nsp) {
           game.players[infected_id].role == roles.normal &&
           !game.players[infected_id].quarantined
         ) {
-          game.players[infector_id].infected = true;
+          game.players[infected_id].infected = true;
         }
       }
     }
