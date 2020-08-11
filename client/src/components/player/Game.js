@@ -671,12 +671,25 @@ export const Game = ({ match, setAlert }) => {
                   })
                   .map((player) => {
                     let p = player;
-                    if (big3 && myInfo && myInfo.role == roles.police) {
+                    if (
+                      big3 &&
+                      myInfo &&
+                      (myInfo.role == roles.police ||
+                        myInfo.role == roles.super_infected ||
+                        myInfo.role == roles.super_infected_hidden)
+                    ) {
                       for (let key in big3) {
                         if (p.arr_id == big3[key]) {
                           return '';
                         }
                       }
+                    }
+                    if (
+                      (myInfo.role == roles.super_infected_hidden ||
+                        myInfo.role == roles.super_infected) &&
+                      p.quarantined
+                    ) {
+                      return '';
                     }
                     return (
                       <li
