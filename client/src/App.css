@@ -217,8 +217,9 @@ ul.selectedPlayers li {
   color: white;
 }
 .bg-allies {
-  background-color: #ffdb15dd;
+  background-color: #ddb915dd;
   color: white;
+  border: none;
 }
 .bg-endgame {
   background-color: #ffdb15;
