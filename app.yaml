@@ -12,6 +12,6 @@ automatic_scaling:
   max_instances: 3
 
 env_variables:
-  mongoURI: 'mongodb+srv://namle:coronagame@coronagamedb.wguee.mongodb.net/coronagamedb?retryWrites=true&w=majority'
+  mongoURI: 'mongodb+srv://nam:coronagame@cluster0.9idht.gcp.mongodb.net/corona?retryWrites=true&w=majority'
   JWTsecret: 'dslgjdlfjfjads34u23r9ewjdsf'
   NODE_ENV: 'production'
