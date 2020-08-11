@@ -5,6 +5,7 @@ const { check, validationResult } = require('express-validator');
 const Room = require('../../models/Room');
 const User = require('../../models/User');
 const Game = require('../../models/Game');
+const rolesList = require('../../enum/roles');
 // const Game = require('../../models/Game');
 
 // @route GET api/game/rooms
@@ -171,12 +172,37 @@ router.put('/room/:id/roles', auth, async (req, res) => {
     }
     let roles = req.body.roles;
     console.log(roles);
+    let counter = {};
+    for (let key in rolesList) {
+      counter[rolesList[key]] = 0;
+    }
     for (let player of room.players) {
       if (roles[player.id]) {
         player.role = roles[player.id];
+        if (
+          player.role != rolesList.normal &&
+          player.role != rolesList.super_infected
+        ) {
+          counter[player.role]++;
+          if (counter[player.role] > 1) {
+            return res
+              .status(400)
+              .json({ msg: 'Duplicated role cannot be set' });
+          }
+        }
       } else {
-        player.role = null;
+        return res.status(400).json({ msg: 'Every player must have a role' });
       }
+    }
+    if (
+      !(
+        counter[rolesList.super_infected_hidden] &&
+        counter[rolesList.doctor] &&
+        counter[rolesList.police] &&
+        counter[rolesList.mask_distributor]
+      )
+    ) {
+      return res.status(400).json({ msg: 'An important role is missed' });
     }
     await room.save();
     res.json(room.players);

@@ -99,41 +99,19 @@ export const AdminTable = ({ match, setAlert }) => {
     }
   }
   function onChangeRole(id, role) {
-    let f = true;
-    for (let key in remainRoles) {
-      if (role == key && remainRoles[key] == false) {
-        setAlert('Duplicated role', 'danger');
-        f = false;
-      }
-      if (role != key && customRoles[id] == key) {
-        setRemainRoles({ ...remainRoles, [key]: true });
-        break;
-      } else if (role == key && customRoles[id] != key) {
-        setRemainRoles({ ...remainRoles, [key]: false });
-        break;
-      }
-    }
-
     setCustomRoles({ ...customRoles, [id]: role });
-    console.log(customRoles);
   }
   function submitRole(roles) {
-    console.log('roles', roles);
-    for (let key in remainRoles) {
-      if (remainRoles[key]) {
-        setAlert('Nt enough role', 'danger');
-        return;
-      }
-    }
-    for (let key in roles) {
-      if (!roles[key]) {
-        setAlert('Cannot set empty role', 'danger');
-        return;
-      }
-    }
-    api.put(`/game/room/${match.params.id}/roles`, { roles }).then((res) => {
-      setPlayers(res.data);
-    });
+    api
+      .put(`/game/room/${match.params.id}/roles`, { roles })
+      .then((res) => {
+        setPlayers(res.data);
+      })
+      .catch((err) => {
+        let msg = err.response.data.msg;
+        // console.log(JSON.stringify(err.response.data));
+        setAlert(msg, 'danger');
+      });
   }
   function startGame(socket) {
     socket.emit(ce.gameStart, true);
@@ -294,7 +272,7 @@ export const AdminTable = ({ match, setAlert }) => {
                             onChangeRole(p._id, e.target.value);
                           }}
                         >
-                          <option value={null}>Nne</option>
+                          <option value={null}>None</option>
 
                           {Object.keys(roles).map((k) => (
                             <option value={roles[k]}>
