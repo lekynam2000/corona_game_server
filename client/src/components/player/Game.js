@@ -129,9 +129,8 @@ export const Game = ({ match, setAlert }) => {
     if (mySocket && !logged) {
       let r_id = sessionStorage.getItem('r_id');
       if (r_id && r_id != '') {
-        socket.emit(ce.reconnect, r_id);
+        mySocket.emit(ce.reconnect, r_id);
       }
-      mySocket.emit();
     }
   }, [mySocket, logged]);
   useEffect(() => {
