@@ -216,6 +216,10 @@ ul.selectedPlayers li {
   background-color: #ff0000dd;
   color: white;
 }
+.bg-endgame {
+  background-color: #ffdb15;
+  font-weight: 600;
+}
 .targetBtnWrapper {
   text-align: right;
 }

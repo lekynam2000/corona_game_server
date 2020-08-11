@@ -650,12 +650,8 @@ async function endPhase(roomId, nsp) {
 }
 async function endGame(roomId, nsp, good_win) {
   const room = await Room.findById(roomId);
-  let msg = '';
-  if (good_win) {
-    msg = 'Every super infected found. Congratulation, you defeated Corona';
-  } else {
-    msg = 'Corona side win. You failed to control the pandemic';
-  }
+  let msg = good_win;
+
   room.game = null;
   room.playing = false;
   room.players.forEach((p) => {

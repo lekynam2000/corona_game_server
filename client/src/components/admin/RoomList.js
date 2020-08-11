@@ -33,7 +33,7 @@ function RoomList({ isAuthenticated, loading, history, setAlert }) {
   return (
     !loading &&
     isAuthenticated && (
-      <Fragment>
+      <div className='gameDetail'>
         <button
           className='btn btn-primary'
           onClick={() => {
@@ -57,7 +57,7 @@ function RoomList({ isAuthenticated, loading, history, setAlert }) {
             </li>
           ))}
         </ul>
-      </Fragment>
+      </div>
     )
   );
 }

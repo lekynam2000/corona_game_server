@@ -518,7 +518,11 @@ export const Game = ({ match, setAlert }) => {
         </div>
         {phaseCard}
         <div className='card placeCardList'>
-          {endGameMsg && <div className='card-header'>{endGameMsg}</div>}
+          {endGameMsg != null && (
+            <div className='card-header bg-endgame'>
+              {endGameMsg ? 'Phe Dân Làng thắng' : 'Phe Corona thắng'}
+            </div>
+          )}
           <div className='card-body'>
             <div className='row pm15'>
               {prettyOrder.map((i) => {
@@ -641,13 +645,9 @@ export const Game = ({ match, setAlert }) => {
                       return '';
                     }
                   })}
-                  <img
-                    src={Quara}
-                    alt='Quarantine Zone'
-                    className='card-img-top'
-                  />
                 </div>
               </div>
+              <img src={Quara} alt='Quarantine Zone' className='card-img-top' />
             </div>
             <div className='card-body'>
               <p className='card-text'></p>
