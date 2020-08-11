@@ -314,6 +314,9 @@ export const Game = ({ match, setAlert }) => {
   const playerTpl = (p) => {
     let shortName = p.name[0];
     let bgClass = 'bg-normal';
+    if (p.quarantined) {
+      bgClass = 'bg-quarantine';
+    }
     if (big3) {
       for (let key in big3) {
         if (p.arr_id == big3[key]) {
@@ -339,9 +342,7 @@ export const Game = ({ match, setAlert }) => {
     }
     return (
       <div
-        className={
-          'playerIcon' + (p.quarantined ? ' quarantined ' : ' ' + bgClass)
-        }
+        className={'playerIcon ' + bgClass}
         // style={{
         //   top: top + '%',
         //   left: left + '%',
@@ -370,7 +371,7 @@ export const Game = ({ match, setAlert }) => {
               <div
                 className={
                   'btn mr-1 phaseBtn ' +
-                  (p == phase ? 'btn-primary' : 'btn-danger bg-allies')
+                  (p == phase ? 'btn-primary' : 'btn-danger bg-quarantine')
                 }
               >
                 {mapping[p].name}
@@ -460,19 +461,14 @@ export const Game = ({ match, setAlert }) => {
                     bgClass = 'bg-special';
                   }
                   if (p.quarantined) {
-                    bgClass = 'bg-allies';
+                    bgClass = 'bg-quarantine';
                   }
                 }
               }
               return (
                 <tr className={bgClass}>
                   <td>{p.name}</td>{' '}
-                  <td>
-                    {p.place > -1 ? placeName[p.place] : 'None'}{' '}
-                    <span className='text-danger'>
-                      {p.quarantined ? '(Q)' : ''}
-                    </span>
-                  </td>
+                  <td>{p.place > -1 ? placeName[p.place] : 'None'} </td>
                 </tr>
               );
             })}
@@ -493,8 +489,8 @@ export const Game = ({ match, setAlert }) => {
                 <p>
                   <b>Point:</b> {point}/{targetPoint}
                 </p>
-                <p className='text-little'>
-                  <b>Quarantine:</b> {quara_num}
+                <p className=''>
+                  <b>Quara:</b> {quara_num}
                 </p>
               </div>
               <div className='col-lg'>
@@ -596,11 +592,6 @@ export const Game = ({ match, setAlert }) => {
       <div className='col-lg-3'>
         <div className='card personalInfo mb-3'>
           <div className='card-body'>
-            <div className='row'>
-              <div className='col-lg-12'>
-                <b>You are:</b> <span className=''>P{myInfo.arr_id}</span>
-              </div>
-            </div>
             <div className='row'>
               <div className='col-lg-12'>
                 <b>Name:</b> {myInfo.name}

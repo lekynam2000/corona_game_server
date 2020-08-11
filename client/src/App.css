@@ -212,8 +212,12 @@ ul.selectedPlayers li {
   background-color: #3f407edd;
   color: white;
 }
-.bg-allies {
+.bg-quarantine {
   background-color: #ff0000dd;
+  color: white;
+}
+.bg-allies {
+  background-color: #ffdb15dd;
   color: white;
 }
 .bg-endgame {
