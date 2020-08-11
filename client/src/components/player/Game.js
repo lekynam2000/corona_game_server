@@ -55,6 +55,10 @@ export const Game = ({ match, setAlert }) => {
     let socket = io(`/room_${match.params.id}`);
     setSocket(socket);
     socket.on(se.errorGame, (e) => {
+      if (e.msg == 'Not valid id') {
+        setLogged(false);
+        sessionStorage.removeItem('r_id');
+      }
       setAlert(e.msg, 'danger');
     });
     socket.on(se.endGame, ({ msg }) => {
@@ -121,6 +125,15 @@ export const Game = ({ match, setAlert }) => {
       socket.emit(ce.force_disconnect, true);
     };
   }, []);
+  useEffect(() => {
+    if (mySocket && !logged) {
+      let r_id = sessionStorage.getItem('r_id');
+      if (r_id && r_id != '') {
+        socket.emit(ce.reconnect, r_id);
+      }
+      mySocket.emit();
+    }
+  }, [mySocket, logged]);
   useEffect(() => {
     if (quara_num > 0 && myInfo.role == roles.police) {
       setMaxSelect(quara_num);

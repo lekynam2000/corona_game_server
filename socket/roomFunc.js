@@ -102,6 +102,16 @@ async function forceChangePhase(socket, roomId, nsp, assiged_phase) {
 async function addPlayer(socket, name, roomId, nsp) {
   try {
     const room = await Room.findById(roomId);
+    if (name.length < 3 || name.length > 10) {
+      return socket.emit(se.errorGame, {
+        msg: 'Name must be between 3 and 10 characters',
+      });
+    }
+    for (let p of room.players) {
+      if (p.name == name) {
+        return socket.emit(se.errorGame, { msg: 'Duplicated name. ' });
+      }
+    }
     room.players.push({ name, connected: true });
     await room.save();
     socket.emit(se.getId, { id: room.players[room.players.length - 1].id });
