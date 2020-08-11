@@ -1,0 +1,17 @@
+runtime: nodejs12
+
+instance_class: F4_1G
+
+handlers:
+  - url: /.*
+    secure: always
+    script: auto
+
+automatic_scaling:
+  min_instances: 1
+  max_instances: 3
+
+env_variables:
+  mongoURI: 'mongodb+srv://namle:coronagame@coronagamedb.wguee.mongodb.net/coronagamedb?retryWrites=true&w=majority'
+  JWTsecret: 'dslgjdlfjfjads34u23r9ewjdsf'
+  NODE_ENV: 'production'
