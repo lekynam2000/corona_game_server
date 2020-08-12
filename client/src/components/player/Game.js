@@ -547,7 +547,7 @@ export const Game = ({ match, setAlert }) => {
                   // active = true;
                   return (
                     <div
-                      className='col-lg-4 placeCardWrapper'
+                      className='col-lg-4 col-6 placeCardWrapper'
                       onClick={() => {
                         move(mySocket, i, myInfo);
                       }}
@@ -581,9 +581,9 @@ export const Game = ({ match, setAlert }) => {
                     </div>
                   );
                 } else if (i == -1) {
-                  return <div className='col-lg-4'></div>;
+                  return <div className='col-lg-4 d-lg-block d-none'></div>;
                 } else {
-                  return <div className='col-lg-4'></div>;
+                  return <div className='col-lg-4 d-lg-block d-none'></div>;
                 }
               })}
             </div>
