@@ -140,7 +140,8 @@ export const Game = ({ match, setAlert }) => {
   }, [quara_num, myInfo]);
   function addPlayer(socket) {
     if (inputName.current && inputName.current.value) {
-      socket.emit(ce.addPlayer, inputName.current.value);
+      let name = inputName.current.value.trim();
+      socket.emit(ce.addPlayer, name);
     } else {
       setAlert('Not allowed empty name', 'danger');
     }
@@ -409,9 +410,9 @@ export const Game = ({ match, setAlert }) => {
             </div>
           </label>
           <p>
-            We suggest this type of naming when playing game:{' '}
-            <b>LWN Lee Wee Nam</b> or <b>LWN Wee Nam</b>(The first 3 letter is
-            abbreviation, the remaining is your detail name)
+            Your first 3 letters of your name will have special meaning while
+            playing game, so let chose it wisely. Your name must be between 3
+            and 10 characters
           </p>
         </li>
         <li className='list-group-item'>
