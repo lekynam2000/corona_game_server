@@ -166,7 +166,13 @@ export const AdminTable = ({ match, setAlert }) => {
           </thead>
           <tbody>
             {game.players.map((p) => (
-              <tr>
+              <tr
+                className={
+                  p.moved || p.quarantined || p.role == roles.police
+                    ? 'bg-special'
+                    : ''
+                }
+              >
                 <td>{p.arr_id}</td>
                 <td>{p.name}</td>
                 <td>{nameMap[p.role]}</td>
