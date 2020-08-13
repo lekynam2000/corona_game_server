@@ -68,6 +68,11 @@ export const AdminTable = ({ match, setAlert }) => {
       gameItv = setInterval(() => {
         fetchGameInfo();
       }, 1000);
+    } else {
+      if (gameItv) {
+        clearInterval(gameItv);
+        gameItv = null;
+      }
     }
     return () => {
       if (gameItv) {
