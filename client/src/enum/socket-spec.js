@@ -39,6 +39,8 @@ export const client_emit = {
   //
   forceChangePhase: 'forceChangePhase',
   //assigned_phase
+  forceChangePoint: 'forceChangePoint',
+  //delta
   getInfo: 'getInfo',
   //r_id
   quarantine: 'quarantine',

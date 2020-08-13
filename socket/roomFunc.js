@@ -17,6 +17,9 @@ module.exports = async function (socket) {
   socket.on(ce.forceChangePhase, (assiged_phase) => {
     forceChangePhase(socket, roomId, nsp, assiged_phase);
   });
+  socket.on(ce.forceChangePoint, (d_point) => {
+    forceChangePoint(socket, roomId, nsp, d_point);
+  });
   socket.on(ce.addPlayer, (name) => {
     addPlayer(socket, name, roomId, nsp).then((data) => {
       inScopeId = data;
@@ -98,6 +101,28 @@ async function forceChangePhase(socket, roomId, nsp, assiged_phase) {
   await game.save();
   // nsp.emit(se.changePhase, game.phase);
   extractBasicInfo(nsp, game);
+}
+async function forceChangePoint(socket, roomId, nsp, delta) {
+  try {
+    const room = await Room.findById(roomId);
+    const game = await Game.findById(room.game);
+    let point = game.point;
+    point = point + delta;
+    if (point >= game.target_point) {
+      return socket.emit(se.errorGame, {
+        msg: 'Cannot increase over the target point',
+      });
+    } else if (point < 0) {
+      return socket.emit(se.errorGame, {
+        msg: 'Cannot make point less than 0',
+      });
+    }
+    game.point = point;
+    await game.save();
+    nsp.emit(se.updatePoint, game.point);
+  } catch (error) {
+    handleError(error, socket);
+  }
 }
 async function addPlayer(socket, name, roomId, nsp) {
   try {

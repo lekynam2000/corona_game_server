@@ -103,6 +103,11 @@ export const AdminTable = ({ match, setAlert }) => {
       socket.emit(ce.forceChangePhase, phaseInput.current.value);
     }
   }
+  function forceChangePoint(socket, d_point) {
+    if (socket) {
+      socket.emit(ce.forceChangePoint, d_point);
+    }
+  }
   function onChangeRole(id, role) {
     setCustomRoles({ ...customRoles, [id]: role });
   }
@@ -141,22 +146,43 @@ export const AdminTable = ({ match, setAlert }) => {
         <p>Number of Corona virus: {game.quara_num}</p>
         <p>Turn: {game.turn}</p>
         <p>Phase: {game.phase}</p>
-        <select ref={phaseInput}>
-          {Object.keys(mapping).map((k) => (
-            <option value={k}>{mapping[k].name}</option>
-          ))}
-        </select>
-        <button
-          className='btn btn-danger'
-          onClick={() => {
-            forceChangePhase(mySocket);
-          }}
-        >
-          Force Change Phase
-        </button>
+        <div>
+          <select ref={phaseInput}>
+            {Object.keys(mapping).map((k) => (
+              <option value={k}>{mapping[k].name}</option>
+            ))}
+          </select>
+          <button
+            className='btn btn-danger ml-2'
+            onClick={() => {
+              forceChangePhase(mySocket);
+            }}
+          >
+            Force Change Phase
+          </button>
+        </div>
+        <div className='mt-2 mb-2'>
+          <span>Change Point: </span>
+          <button
+            className='btn btn-primary ml-1 mr-1'
+            onClick={() => {
+              forceChangePoint(mySocket, 1);
+            }}
+          >
+            +
+          </button>
+          <button
+            className='btn btn-danger ml-1 mr-1'
+            onClick={() => {
+              forceChangePoint(mySocket, -1);
+            }}
+          >
+            -
+          </button>
+        </div>
         <p>Number of moved players: {game.moved_num}</p>
         <img src={NTUmap} alt='NTU Map' height='200' />
-        <table>
+        <table className='mt-3'>
           <thead>
             <tr>
               <th>Index</th>
