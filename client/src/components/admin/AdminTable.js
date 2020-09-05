@@ -7,7 +7,7 @@ import roles from '../../enum/roles';
 import { server_emit as se, client_emit as ce } from '../../enum/socket-spec';
 import io from 'socket.io-client';
 import mapping from '../player/mapping';
-import nameMap from '../player/vnName';
+import nameMap from '../player/enName';
 import NTUmap from '../../img/NTUmap.jpg';
 export const AdminTable = ({ match, setAlert }) => {
   const placeName = [
