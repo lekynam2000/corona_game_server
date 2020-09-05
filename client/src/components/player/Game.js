@@ -7,7 +7,8 @@ import roles from '../../enum/roles';
 import phases from '../../enum/phases';
 import { server_emit as se, client_emit as ce } from '../../enum/socket-spec';
 import mapping from './mapping';
-import nameMap from './vnName';
+import VNnameMap from './vnName';
+import ENnameMap from './enName';
 import Can2 from '../../img/canteen2.jpg';
 import theArc from '../../img/the_arc.jpg';
 import nyAudi from '../../img/ny_audi.jpg';
@@ -30,6 +31,7 @@ export const Game = ({ match, setAlert }) => {
   ];
   const prettyOrder = [1, 0, 5, 2, 6, -1, 3, -2, 4];
   const placeImg = [Can2, theArc, nyAudi, theHive, YuuGar, Hall6, Fullerton];
+  const [nameMap, setNameMap] = useState(ENnameMap);
   const [logged, setLogged] = useState(false);
   const [mySocket, setSocket] = useState(null);
   const [playing, setPlaying] = useState(false);
